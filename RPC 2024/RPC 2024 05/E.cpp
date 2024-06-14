@@ -1,127 +1,80 @@
 #include <bits/stdc++.h>
+#define limite 1000000
 using namespace std;
-#define limite 1000005
-
-int binarySearch (const vector<int>& A, int i, int j, int k) {
-    int m;
-    while (i <= j) {
-        m = (i + j) >> 1;
-        if (A[m] == k)
-            return m;
-        else if (k > A[m])
-            i = m + 1;
-        else
-            j = m - 1;
-    }
-    return -i -1;
-}
-
-int binarySearchFirstOccurrence(const vector<int>& A, int i, int j, int k) {
-    int result, result2;
-    result = binarySearch(A, i, j, k);
-    if (result >= 0) {
-        result2 = binarySearch(A, i, result - 1, k);
-        while (result2 >= 0) {
-            result = result2;
-            result2 = binarySearch(A, i, result - 1, k);
-        }
-    }
-    return result;
-}
-
-int binarySearchLastOccurrence(const vector<int>& A, int i, int j, int k) {
-    int result, result2;
-    result = binarySearch(A, i, j, k);
-    if (result >= 0) {
-        result2 = binarySearch(A, result + 1, j, k);
-        while (result2 >= 0) {
-            result = result2;
-            result2 = binarySearch(A, result + 1, j, k);
-        }
-    }
-    return result;
-}
 
 int main() {
     ios_base::sync_with_stdio(false);cin.tie(0);
-    
-    //Guardar los numeros primos en un arreglo
-    bool es_primo[limite + 1];
-    
-    es_primo[0] = es_primo[1] = false;
-    for (int i = 2; i <= limite; ++i) 
-        es_primo[i] = true;
-    
-    for (long long int p = 2; p * p <= limite; p++) {
-        if (es_primo[p]) {
-            for (long long int i = p * p; i <= limite; i += p) 
+    //Sieve of  Eratosthenes
+    vector<int> primos(1,0);
+    map<int, vector<int>> bigPrimes;
+    vector<bool> es_primo(limite + 1, true);
+    for (int p = 2; p < 1000; p++)
+        if (es_primo[p]){
+            primos.push_back(p);
+            for (int i = p * p; i <= limite; i += p)
                 es_primo[i] = false;
         }
-    }
-    
-    vector<int> primos;
-    primos.push_back(0);
-    for (int i = 2; i <= limite; i++) {
-        if (es_primo[i]) 
-            primos.push_back(i);
-    }
+    int nPrimos = primos.size() - 1;
     //--------------------------------------------------
-    int days;cin >> days;
-    int save;
-    int test;
-    vector<vector<int>> freq(primos.size()+1, vector<int>(1, 0));
+    int save, test, days; cin >> days;
+    vector<vector<int>> freq(nPrimos + 1, vector<int>(1,0));
     for (int i = 1; i <= days; i++) {
         cin >> save;
         test = 1;
-        
-        while (save != 1) {
+        while (save != 1 && test <= nPrimos) {
             if (save % primos[test] == 0) {
                 freq[test].push_back(i);
                 save /= primos[test];
-            }
-            else test++;
+            } else
+                test++;
+        }
+        if (save != 1) {
+            if (bigPrimes.find(save) != bigPrimes.end())
+                bigPrimes[save].push_back(i);
+            else
+                bigPrimes[save] = vector<int> {i};
         }
     }
-
+    //--------------------------------------------------
     bool possible;
-    int q, l, r, n, searchL, searchR;
+    int q, l, r, n, search;
     cin >> q;
     while (q--) {
         possible = true;
         test = 1;
         cin >> l >> r >> n;
-        vector<int> caso(primos.size()+1, 0);
-        while (n != 1 && possible) {
+        vector<int> caso(nPrimos + 1, 0);
+        while (n != 1 && test <= nPrimos) {
             if (n % primos[test] == 0) {
                 caso[test]++;
                 n /= primos[test];
-            }
-            else {
+            } else {
                 if (caso[test] > 0) {
-                    searchL = binarySearchFirstOccurrence(freq[test], 1, freq[test].size()-1, l);
-                    searchR = binarySearchLastOccurrence(freq[test], 1, freq[test].size()-1, r);
-                    if (searchL < 0)searchL = -searchL -1;
-                    else if (searchR < 0)searchR = -searchR -2;
-                    if (searchR - searchL + 1 < caso[test])
+                    search = distance (lower_bound(freq[test].begin(), freq[test].end(), l), upper_bound(freq[test].begin(), freq[test].end(), r));
+                    if (search < caso[test]) {
                         possible = false;
+                        break;
+                    }
                 }
                 test++;
             }
         }
-        if (possible) {
-            if (caso[test] > 0) {
-                searchL = binarySearchFirstOccurrence(freq[test], 1, freq[test].size()-1, l);
-                searchR = binarySearchLastOccurrence(freq[test], 1, freq[test].size()-1, r);
-                if (searchL < 0)searchL = -searchL -1;
-                else if (searchR < 0)
-                    searchR = -searchR -2;
-                if (searchR - searchL + 1 < caso[test])
+        if (possible && test <= nPrimos) {
+            search = distance (lower_bound(freq[test].begin(), freq[test].end(), l), upper_bound(freq[test].begin(), freq[test].end(), r));
+            if (search < caso[test])
+                possible = false;
+        }
+        if(possible && n != 1) {
+            if (bigPrimes.find(n) == bigPrimes.end())
+                possible = false;
+            else {
+                vector<int> bigPrimePos = bigPrimes.find(n)->second;
+                search = distance (lower_bound(bigPrimePos.begin(), bigPrimePos.end(), l), upper_bound(bigPrimePos.begin(), bigPrimePos.end(), r));
+                if (search == 0)
                     possible = false;
             }
         }
-        if (possible) cout << "Yes\n";
-        else cout << "No\n";
+        cout << (possible ? "Yes" : "No") << endl;
     }
-    
     return 0;
 }
