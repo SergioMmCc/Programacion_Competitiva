@@ -4,7 +4,7 @@ const int limite = 221;
 bool es_primo[limite + 1];
 vector<int> primos(1, 0);
 vector<int> posPrimo(221, 0);
-vector<long long>restas(7, 0);
+vector<long long>dp(7, 0);
 
 void erastotenes () {
     es_primo[0] = es_primo[1] = false;
@@ -36,32 +36,29 @@ long long pot (int b, int e) {
 int main() {
     erastotenes();
     
-    int n, pos, j, k, dif; cin >> n;
-    long long ans, sus = 0;
+    int n, pos, j, k, dif, l; cin >> n;
+    long long ans, sus = 0, aux;
     if (n == 2 || n == 3) {
         cout << "1\n";
         return 0;
     }
     pos = posPrimo[n];
-    ans = pot(2, pos-2);
+    ans = pot(2, pos-2); //Max # combinaciones
     
+    // Malas formas de llegar a cada numero
     for (int i = 7; i <= pos; i++) {
         for (j = 1, dif = 15; dif > 14; j++) 
             dif = primos[i] - primos[j];
         j -= 2;
-        restas.push_back(pot(2, j-1));
+        dp.push_back(pot(2, j-1));
     }
     
-    for (int i = 7; i <= pos-2; i++) {
-        for (k = i+1, dif = 0; dif <= 14 && k <= pos+1; k++) 
-            dif = primos[k] - primos[i];
-        k -= 2;
-        restas[i] *= pot(2, k-i-1);
+    for (int i = 8; i <= pos; i++) {
+        for (j = i-1; j >= 7 && primos[i] - primos[j] <= 14; j--) 
+            dp[i] += dp[j];
     }
-    for (int i = 7; i <= pos; i++) 
-        sus += restas[i];
-        
-    cout << ans-sus << "\n";
+
+    cout << ans-dp[pos] << "\n";
 
     return 0;
 }
