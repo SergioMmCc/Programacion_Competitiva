@@ -12,9 +12,11 @@ int main () {
         tree[save].first.push_back(i);
     }
     
-    for (int i = n-1; i >= 0; --i) {
-        if(tree[i].first.size() == 1 && tree[tree[i].first[0]].first.size() == 1)
-            tree[i].first[0] = tree[tree[i].first[0]].first[0];
+    for (int i = n - 1; i >= 0; --i) {
+        for(auto& child : tree[i].first) {
+            if(tree[child].first.size() == 1)
+                child = tree[child].first.front();
+        }
     }
     
     while(q--) {
