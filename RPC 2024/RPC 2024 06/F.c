@@ -46,8 +46,8 @@ int binarySearch (int A [], int i, int j, int k) {
            return m;
         else if (k > A[m])
              i = m + 1;
-           else
-                j = m - 1;
+        else
+            j = m - 1;
     }
     return -i -1;
 }
