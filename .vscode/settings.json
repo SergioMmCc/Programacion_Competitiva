@@ -1,6 +1,13 @@
 {
     "files.associations": {
         "xtree": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "utility": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp",
+        "iostream": "cpp",
+        "xiosbase": "cpp",
+        "algorithm": "cpp",
+        "map": "cpp"
     }
 }
