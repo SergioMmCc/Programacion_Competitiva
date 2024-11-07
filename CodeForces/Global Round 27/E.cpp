@@ -9,17 +9,26 @@ void solver() {
     ll x, y, z, k; cin>>x>>y>>z>>k;
     ll d = 0, ans = inf, aux = 0, sum = 0;
     while(z > 0){
-        d++;
-        sum += x;
-        aux = ((z + d - 1) / d) * y;
-        ans = min(ans, aux + sum);
-
-        if((z + d - 1) / d == 1) break;
-
-        if(d % k == 0) {
-            z -= d;
-            sum += y;
+        ll dd = d + 1, lastdd = d;
+        ll w = (z + dd - 1) / dd;
+        ll test = inf;
+        while(dd <= d + k){
+            test = min(test, y * w + x * (dd - d));
+            w--;
+            if(w == 0)break;
+            lastdd = dd;
+            dd = (z + w - 1) / w;
+            w = (z + dd - 1) / dd;
+            if(dd == lastdd){
+                dd++; lastdd++;
+                w = (z + dd - 1) / dd;
+            }
         }
+        aux = sum + test;
+        ans = min(ans, aux);
+        d += k;
+        z -= d;
+        sum += k*x + y;
     }
 
     cout<<ans<<endl;
