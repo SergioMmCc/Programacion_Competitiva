@@ -4,10 +4,17 @@ using namespace std;
 using ll = long long;
 using ld = long double;
 #define pb push_back
-#define sz size()
 
 void solver(){
-    
+    ll n; cin>>n;
+    ll pot5 = 5;
+    ll ans = 0;
+    while(pot5 <= n){
+        ans += (n / pot5);
+        pot5 *= 5;
+    }
+
+    cout<<ans<<endl;
 }
 
 int main(){

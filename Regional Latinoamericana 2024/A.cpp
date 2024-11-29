@@ -4,10 +4,15 @@ using namespace std;
 using ll = long long;
 using ld = long double;
 #define pb push_back
-#define sz size()
 
 void solver(){
-    
+    string s;cin>>s;
+    set<char> letters;
+    for(int i = 0; i < s.size(); i++){
+        letters.insert(s[i]);
+    }
+
+    cout<<s.size() - letters.size()<<endl;
 }
 
 int main(){

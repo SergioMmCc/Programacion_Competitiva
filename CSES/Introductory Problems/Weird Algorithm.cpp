@@ -4,10 +4,16 @@ using namespace std;
 using ll = long long;
 using ld = long double;
 #define pb push_back
-#define sz size()
 
 void solver(){
-    
+    ll n; cin>>n;
+    cout<<n;
+    while(n != 1){
+        if(n % 2 == 0)n /= 2;
+        else n = 3*n + 1;
+        cout<<' '<<n;
+    }
+    cout<<endl;
 }
 
 int main(){

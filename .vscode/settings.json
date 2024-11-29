@@ -3,6 +3,15 @@
         "vector": "cpp",
         "algorithm": "cpp",
         "xiosbase": "cpp",
-        "iostream": "cpp"
-    }
+        "iostream": "cpp",
+        "xstring": "cpp",
+        "utility": "cpp",
+        "map": "cpp",
+        "xtree": "cpp",
+        "ios": "cpp",
+        "tuple": "cpp"
+    },
+    "cSpell.words": [
+        "cifras"
+    ]
 }
