@@ -47,12 +47,13 @@ void solver(){
 
     // Prefix Sum de la cantidad de elementos de profundidad menor o igual a i
     vector<int> psProfLen(n + 1);
-    for(int i = 1; i <= n; i++){
+    psProfLen[0] = 1;
+    for(int i = 1; i < n; i++){
         psProfLen[i] = psProfLen[i-1] + (int)prof[i].sz;
     }
 
     // Inicializar respuesta dejando hojas de tamaño 1
-    int ans = n - psProfLen[1] - 1;
+    int ans = n - psProfLen[1];
     
     // Testear movimientos para cada profundidad de hoja
     int cutted = 0;
@@ -71,13 +72,13 @@ void solver(){
                 if(!hijos[u]){
                     cutted++;
                     deleted[u] = 1;
-                    u = hijos[u];
+                    u = father[u];
                 }
                 else break;
             }
         }
 
-        int aux = n - psProfLen[iProf] - 1 + cutted;
+        int aux = n - psProfLen[iProf] + cutted;
         ans = min(ans, aux);
     }
 
