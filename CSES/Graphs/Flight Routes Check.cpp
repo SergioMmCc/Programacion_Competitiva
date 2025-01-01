@@ -2,28 +2,13 @@
 using namespace std;
 #define endl '\n'
 using ll = long long;
+using ld = long double;
 #define pb push_back
+#define sz size()
 
-/* Complexity: O(E + V)
-Tarjan’s algorithm for finding strongly connected
-components.
-*d[i] = Discovery time of node i. (Initialize to -1)
-*low[i] = Lowest discovery time reachable from node
-i. (Doesn’t need to be initialized)
-*scc[i] = Strongly connected component of node i. (Doesn’t
-need to be initialized) (0-index)
-*s = Stack used by the algorithm (Initialize to an empty
-stack)
-*stacked[i] = True if i was pushed into s. (Initialize to
-false)
-*ticks = Clock used for discovery times (Initialize to 0)
-*current_scc = ID of the current_scc being discovered
-(Initialize to 0)
-*/
+const int maxn = 2e5 + 5;
+vector<vector<int>> graph(maxn);
 
-const int maxn = 1e5 + 1;
-
-vector<int> graph[maxn];
 vector<int> d(maxn, -1), low(maxn), scc(maxn), reps(maxn, 0);
 vector<bool> stacked(maxn);
 stack<int> s;
@@ -55,20 +40,44 @@ void tarjan(int u){
     }
 }
 
+bool BFS(int s, int d, int n){
+    vector<bool> visited(n+1); visited[s] = 1;
+    queue<int> q; q.push(s);
+    while(!q.empty()){
+        int u = q.front(); q.pop();
+        for(int v : graph[u]){
+            if(visited[v]) continue;
+            visited[v] = 1;
+            q.push(v);
+        }
+    }
+
+    return visited[d];
+}
+
 void solver(){
     int n, m; cin>>n>>m;
-    for(int i = 1; i <= m; i++){
-        int u, v;cin>>u>>v;
+    for(int i = 0; i < m; i++){
+        int u, v; cin>>u>>v;
         graph[u].pb(v);
     }
 
-    // Hallar los SCC
     for(int i = 1; i <= n; i++){
         if(d[i] == -1) 
             tarjan(i);
     }
 
-    cout<<current_scc<<endl;
+    if(current_scc == 1) cout<<"YES"<<endl;
+    else{
+        cout<<"NO"<<endl;
+        int a = 1, b = 0;
+        for(int i = 2; !b && i <= n; i++){
+            if(scc[i] != scc[1]) b = i;
+        }
+        if(BFS(1, b, n)) swap(a, b);
+
+        cout<<a<<' '<<b<<endl;
+    }
 }
 
 int main(){

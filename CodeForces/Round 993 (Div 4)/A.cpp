@@ -5,16 +5,21 @@ using ll = long long;
 using ld = long double;
 #define pb push_back
 #define sz size()
-typedef pair<int, int> pii;
 
 void solver(){
-    
+    int n; cin>>n;
+    int ans = 0;
+    for(int i = 1; i < n; i++){
+        for(int j = 1; j < n; j++){
+            if(i + j == n) ans++; 
+        }
+    }
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(NULL);
     int t = 1;
-    // cin>>t;
+    cin>>t;
     while(t--){
         solver();
     }
