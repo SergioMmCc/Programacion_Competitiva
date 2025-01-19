@@ -83,12 +83,6 @@ void solver(){
             int sum = d[0][i][j] + d[1][i][j] + d[2][i][j];
             if(maze[i][j] == '.') sum -= 2;
             ans = min(ans, sum);
-            // if(d[0][i][j] == inf || d[1][i][j] == inf || d[2][i][j] == inf) continue;
-            // cout<<"i -> "<<i<<" | j -> "<<j;
-            // cout<<" | 1 -> "<<(d[0][i][j] == inf ? -1 : d[0][i][j]);
-            // cout<<" | 2 -> "<<(d[1][i][j] == inf ? -1 : d[1][i][j]);
-            // cout<<" | 3 -> "<<(d[2][i][j] == inf ? -1 : d[2][i][j]);
-            // cout<<endl;
         }
     }
 
