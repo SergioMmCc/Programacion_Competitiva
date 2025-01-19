@@ -12,11 +12,9 @@ vector<vector<int>> graph(maxn);
 
 bool BFS(int s, vector<int>& p, vector<int>& sets, map<int, int>& T, int a, int b){
     int color = sets[s];
-    // cout<<"s -> "<<s<<" color -> "<<color<<endl;
     queue<int> q; q.push(s);
     while(!q.empty()){
         int u = q.front(); q.pop();
-        // cout<<"u -> "<<u<<endl;
         if(color == 0){
             if(T.find(a - p[u]) != T.end()){
                 int v = T[a - p[u]];
@@ -49,7 +47,6 @@ bool BFS(int s, vector<int>& p, vector<int>& sets, map<int, int>& T, int a, int 
             }
             else return 0;
 
-            // cout<<"a - p[u] -> "<<a - p[u]<<endl;
             if(T.find(a - p[u]) != T.end()){
                 int v = T[a - p[u]];
                 if(sets[v] == 0) return 0;
@@ -87,8 +84,6 @@ void solver(){
         int num2 = b - p[i];
         if(T.find(num2) != T.end() && (sets[T[num2]] == 0 || sets[T[num2]] == -1)) cond2 = 1;
  
-        // cout<<"i -> "<<i<<" p[i] -> "<<p[i]<<" num1 -> "<<num1<<" num2 -> "<<num2<<endl;
- 
         if(!cond1 && !cond2){
             cout<<"NO"<<endl;
             return;
@@ -105,7 +100,6 @@ void solver(){
         }
  
         else if(cond2){
-            // cout<<"i -> "<<i<<endl;
             sets[i] = 1;
             if(!BFS(i, p, sets, T, a, b)){
                 cout<<"NO"<<endl;
