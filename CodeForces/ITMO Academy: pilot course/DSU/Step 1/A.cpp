@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define endl '\n'
+using ll = long long;
+using ld = long double;
+#define pb push_back
+#define sz size()
+typedef pair<int, int> pii;
+
+const int maxn = 1e5 + 2;
+vector<int> leader(maxn);
+vector<int> sets[maxn];
+int components;
+
+void initDSU(int n){
+    components = n;
+    for(int i = 1; i <= n; i++){
+        leader[i] = i;
+        sets[i].push_back(i);
+    }
+}
+
+void join(int u, int v){
+    int leaderU = leader[u], leaderV = leader[v];
+    if(leaderU != leaderV){
+        if(sets[leaderV].size() > sets[leaderU].size())
+            swap(leaderU, leaderV);
+        
+        for(int i = 0; i < sets[leaderV].size(); i++){
+            int v = sets[leaderV][i];
+            leader[v] = leaderU;
+            sets[leaderU].push_back(v);
+        }
+        sets[leaderV].clear();
+        components--;
+    }
+}
+
+void solver(){
+    int n, q; cin>>n>>q;
+    initDSU(n);
+    while(q--){
+        string op; int u, v; cin>>op>>u>>v;
+        if(op == "union") join(u, v);
+        else cout<<(leader[u] == leader[v] ? "YES" : "NO")<<endl;
+    }
+}
+
+int main(){
+    ios_base::sync_with_stdio(0);cin.tie(NULL);
+    int t = 1;
+    // cin>>t;
+    while(t--){
+        solver();
+    }
+
+    return 0;
+}
