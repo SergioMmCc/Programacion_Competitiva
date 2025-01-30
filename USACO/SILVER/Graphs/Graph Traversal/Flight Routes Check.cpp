@@ -1,18 +1,16 @@
-// Enlace al problema: https://codeforces.com/problemset/problem/427/C
-
 #include<bits/stdc++.h>
 using namespace std;
 #define endl '\n'
 using ll = long long;
+using ld = long double;
 #define pb push_back
+#define sz size()
 
-const int MAXN = 1e5 + 1;
-const ll mod = 1e9 + 7;
+const int maxn = 2e5 + 5;
+vector<vector<int>> graph(maxn);
 
-vector<int> g[MAXN];
-vector<int> d(MAXN, -1), low(MAXN), scc(MAXN), reps(MAXN, 0);
-vector<ll> cost(MAXN), mini(MAXN, 2e9);
-vector<bool> stacked(MAXN);
+vector<int> d(maxn, -1), low(maxn), scc(maxn), reps(maxn, 0);
+vector<bool> stacked(maxn);
 stack<int> s;
 int ticks = 0, current_scc = 0;
 
@@ -20,7 +18,7 @@ void tarjan(int u){
     d[u] = low[u] = ticks++;
     s.push(u);
     stacked[u] = true;
-    const vector<int> &out = g[u];
+    const vector<int> &out = graph[u];
     for (int k=0, m=out.size(); k<m; ++k){
         const int &v = out[k];
         if (d[v] == -1){
@@ -42,13 +40,26 @@ void tarjan(int u){
     }
 }
 
+bool BFS(int s, int d, int n){
+    vector<bool> visited(n+1); visited[s] = 1;
+    queue<int> q; q.push(s);
+    while(!q.empty()){
+        int u = q.front(); q.pop();
+        for(int v : graph[u]){
+            if(visited[v]) continue;
+            visited[v] = 1;
+            q.push(v);
+        }
+    }
+
+    return visited[d];
+}
+
 void solver(){
-    int n; cin>>n;
-    for(int i = 1; i <= n; i++)cin>>cost[i];
-    int m; cin>>m;
-    for(int i = 1; i <= m; i++){
-        int u, v;cin>>u>>v;
-        g[u].pb(v);
+    int n, m; cin>>n>>m;
+    for(int i = 0; i < m; i++){
+        int u, v; cin>>u>>v;
+        graph[u].pb(v);
     }
 
     for(int i = 1; i <= n; i++){
@@ -56,20 +67,17 @@ void solver(){
             tarjan(i);
     }
 
-    for(int i = 1; i <= n; i++){
-        int c = scc[i];
-        if(cost[i] < mini[c]) {mini[c] = cost[i]; reps[c] = 1;}
-        else if(cost[i] == mini[c]) reps[c]++;
-    }
+    if(current_scc == 1) cout<<"YES"<<endl;
+    else{
+        cout<<"NO"<<endl;
+        int a = 1, b = 0;
+        for(int i = 2; !b && i <= n; i++){
+            if(scc[i] != scc[1]) b = i;
+        }
+        if(BFS(1, b, n)) swap(a, b);
 
-    ll a = 0, b = 1;
-    for(int i = 0; i < current_scc; i++){
-        a += mini[i];
-        b *= reps[i];
-        b %= mod;
+        cout<<a<<' '<<b<<endl;
     }
-
-    cout<<a<<' '<<b<<endl;
 }
 
 int main(){
