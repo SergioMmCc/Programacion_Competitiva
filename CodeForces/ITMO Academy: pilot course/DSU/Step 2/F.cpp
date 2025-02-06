@@ -7,9 +7,11 @@ using ld = long double;
 #define sz size()
 typedef pair<int, int> pii;
 
+const int inf = 2e9 + 2;
+
 // Estructura para almacenar todas las aristas
 struct edge {
-    int u, v, w, id;
+    int u, v, w;
 
     // Ordenar las aristas por el menor peso
     bool operator<(const edge& that) const {
@@ -18,7 +20,7 @@ struct edge {
 };
 
 // Implementacion DSU
-const int maxn = 50005;
+const int maxn = 1005;
 int components;
 vector<int> leader(maxn), sizen(maxn);
 
@@ -50,49 +52,41 @@ void join(int u, int v){
 // Algoritmo de Kruskal para hallar el Minimal Spanning Tree
 // Complejidad O(m * lg(m))
 // En grafos densos m ≈ n²
-int kruskal(vector<edge>& edges, int n, int m, ll s, vector<int>& deletedEdges){
-    vector<bool> used(m+1);
+int kruskal(vector<edge>& edges, int n){
+    int ans = inf;
     sort(edges.begin(), edges.end());
-    initDSU(n);
 
-    for(int i = edges.sz - 1; components > 1 && i >= 0; i--){
-        int u = edges[i].u, v = edges[i].v;
-        if(find(u) != find(v)){
-            join(u, v);
-            used[edges[i].id] = 1;
-        }
-    }
-
-    int count = 0;
     for(int i = 0; i < edges.sz; i++){
-        if(used[edges[i].id]) continue;
-        int w = edges[i].w;
-        if(w > s) break;
-        s -= w;
-        count++;
-        deletedEdges.pb(edges[i].id);
+        initDSU(n);
+        int mine = 1e9, maxe = -1e9;
+        for(int j = i; components != 1 && j < edges.sz; j++){
+            int u = edges[j].u, v = edges[j].v, w = edges[j].w;
+            if(find(u) != find(v)){
+                mine = min(mine, w);
+                maxe = max(maxe, w);
+                join(u, v);
+            }
+        }
+
+        if(components != 1) break;
+        ans = min(ans, maxe - mine);
     }
 
-    return count;
+    return ans;
 }
 
 void solver(){
-    int n, m; ll s; cin>>n>>m>>s;
+    int n, m; cin>>n>>m;
     vector<edge> edges;
     for(int i = 0; i < m; i++){
         int u, v, w; cin>>u>>v>>w;
-        edge newEdge; newEdge.w = w, newEdge.u = u, newEdge.v = v, newEdge.id = i + 1;
+        edge newEdge; newEdge.w = w, newEdge.u = u, newEdge.v = v;
         edges.pb(newEdge);
     }
 
-    vector<int> deletedEdges;
-    cout<<kruskal(edges, n, m, s, deletedEdges)<<endl;
-    sort(deletedEdges.begin(), deletedEdges.end());
-    for(int i = 0; i < deletedEdges.sz; i++){
-        if(i) cout<<' ';
-        cout<<deletedEdges[i];
-    }
-    cout<<endl;
+    int ans = kruskal(edges, n);
+    if(ans == inf) cout<<"NO"<<endl;
+    else cout<<"YES"<<endl<<ans<<endl;
 }
 
 int main(){
