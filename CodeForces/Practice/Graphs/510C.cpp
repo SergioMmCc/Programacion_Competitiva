@@ -7,17 +7,17 @@ using ld = long double;
 #define sz size()
 typedef pair<int, int> pii;
 
-const int maxn = 2e5 + 1;
+const int maxn = 27;
 vector<vector<int>> graph(maxn);
 vector<int> inDegree(maxn);
 
-// Sirve para hallar un "Topologycal Sort" en un DAG (Directed Acyclic Graph)
-// Un "Topologycal Sort", es una forma de ordenar los nodos dado que para cada
+// Sirve para hallar un "Topological Sort" en un DAG (Directed Acyclic Graph)
+// Un "Topological Sort", es una forma de ordenar los nodos dado que para cada
 // arista dirigida de 'u' a 'v', 'u' aparece antes que 'v' en el orden
 // Esta implementacion se base en un BFS, por ende la complejidad es O(n + m)
-void topoSort(int n, vector<int>& orden){
+void topoSort(vector<int>& orden){
     queue<int> q;
-    for(int i = 1; i <= n; i++){
+    for(int i = 0; i < 26; i++){
         if(!inDegree[i]){ 
             // Si el nodo no tiene ningun inDegree, quiere decir que puede ir al incio del topoSort
             q.push(i);
@@ -40,22 +40,33 @@ void topoSort(int n, vector<int>& orden){
 }
 
 void solver(){
-    int n, m; cin>>n>>m;
-    for(int i = 0; i < m; i++){
-        int u, v; cin>>u>>v;
-        graph[u].pb(v);
-        inDegree[v]++;
+    int n; cin>>n;
+    string lastName; cin>>lastName;
+    bool cond = 1;
+    for(int i = 1; i < n; i++){
+        string newName; cin>>newName;
+        int j = 0;
+        while(j < lastName.sz && j < newName.sz && lastName[j] == newName[j]) j++;
+        if(j >= newName.sz) cond = 0;
+        else if(j < lastName.sz){
+            graph[lastName[j] - 'a'].pb(newName[j] - 'a');
+            inDegree[newName[j] - 'a']++;
+        }
+        lastName = newName;
+    }
+
+    if(!cond){
+        cout<<"Impossible"<<endl;
+        return;
     }
 
     vector<int> ans;
-    topoSort(n, ans);
-    if(ans.sz < n) cout<<"IMPOSSIBLE"<<endl; 
-    // Si el topoSort no contiene todos los nodos, quiere decir que no hay ninguna forma 
-    // valida de ordenarlos, es decir, el grafo dado no es un DAG (Contiene algun ciclo)
+    
+    topoSort(ans);
+    if(ans.sz < 26) cout<<"Impossible"<<endl;
     else{
         for(int i = 0; i < ans.sz; i++){
-            if(i) cout<<' ';
-            cout<<ans[i];
+            cout<<(char)(ans[i] + 'a');
         }
         cout<<endl;
     }
