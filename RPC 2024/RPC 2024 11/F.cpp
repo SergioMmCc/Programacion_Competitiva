@@ -96,8 +96,9 @@ vector<vector<ll>> find_faces(vector<Point> vertices, vector<vector<ll>> adj) {
     return faces;
 }
 
-//P es un polígono ordenado anticlockwise.
+//P es un pol´ıgono ordenado anticlockwise.
 //Si es clockwise, retorna el area negativa.
+//Si no esta ordenado retorna pura mierda.
 //P[0] != P[n-1]
 ld PolygonArea(const vector<Point> &p){
     ld r = 0.0;
@@ -107,7 +108,6 @@ ld PolygonArea(const vector<Point> &p){
     }
     return r/2.0;
 }
-
 int main(){
 	ios_base::sync_with_stdio(0);cin.tie(NULL);
 	ll n; cin>>n;
@@ -147,8 +147,11 @@ int main(){
     ld ans = 0;
     for(ll i = 0; i < faces.size(); i++){
         vector<Point> aux;
-        for(ll u : faces[i]) aux.pb(vertices[u]);
+        for(ll u : faces[i]) {
+            aux.pb(vertices[u]);
+        }
         ld sum = PolygonArea(aux);
+        if(sum < 0)continue;
         sum *= sum;
         ans += sum;
     }
