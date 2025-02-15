@@ -1,10 +1,10 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define endl '\n'
-#define MAXN 100000
+#define MAXN 200005
+#define int long long
 
-long long const inf = 2e9;
-
+const int inf = 1e18;
 typedef pair<int, int> pii;
 vector<pii> graph[MAXN+1];
 
@@ -36,19 +36,21 @@ void dijkstra(int source, int n, vector<int>& d, vector<int>& parent){
     }
 }
 
-int main() {
+signed main() {
     ios_base::sync_with_stdio(0);cin.tie(NULL);
     int n, m;cin>>n>>m;
     for(int i = 0; i < m; i++){
         int u, v, w;
         cin>>u>>v>>w;
         graph[u].push_back({v, w});
-        graph[v].push_back({u, w});
     }
     vector<int> d(n+1), parent(n+1);
     dijkstra(1, n, d, parent);
-    for(int i = 1; i <= n; i++)
-        cout<<"vertex: "<<i<<" d: "<<d[i]<<" parent: "<<parent[i]<<endl;
+    for(int i = 1; i <= n; i++){
+        if(i > 1) cout<<' ';
+        cout<<d[i];
+    }
+    cout<<endl;
 
     return 0;
 }
