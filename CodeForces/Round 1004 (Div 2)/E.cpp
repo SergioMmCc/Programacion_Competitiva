@@ -33,7 +33,7 @@ void solver(){
     int minL = 2e9;
     bool cond = 0;
     for(int i = 1; !cond && i < pos0; i++){
-        // Sacar el elemento de right y ponerlo en left
+        // Sacar el elemento de right
         multiset<int>::iterator it = right.find(a[i]);
         right.erase(it);
         if(a[i] < mex){ // Si el elemento era el mex, actualizarlo
