@@ -12,9 +12,9 @@ vector<vector<int>> graph(maxn);
 vector<int> inDegree(maxn);
 
 void topoSort(int n, vector<int>& orden){
-    priority_queue<int, vector<int>, greater<int>> pq;
+    priority_queue<int> pq;
     for(int i = 1; i <= n; i++){
-        if(!inDegree[i]){
+        if(!inDegree[i]){ 
             pq.push(i);
         }
     }
@@ -29,26 +29,25 @@ void topoSort(int n, vector<int>& orden){
             }
         }
     }
+
+    reverse(orden.begin(), orden.end());
 }
 
 void solver(){
     int n, m; cin>>n>>m;
     for(int i = 0; i < m; i++){
         int u, v; cin>>u>>v;
-        graph[u].pb(v);
-        inDegree[v]++;
+        graph[v].pb(u);
+        inDegree[u]++;
     }
 
     vector<int> ans;
     topoSort(n, ans);
-    if(ans.sz < n) cout<<"IMPOSSIBLE"<<endl;
-    else{
-        for(int i = 0; i < ans.sz; i++){
-            if(i) cout<<' ';
-            cout<<ans[i];
-        }
-        cout<<endl;
+    for(int i = 0; i < ans.sz; i++){
+        if(i) cout<<' ';
+        cout<<ans[i];
     }
+    cout<<endl;
 }
 
 int main(){
