@@ -8,10 +8,16 @@ using ld = long double;
 typedef pair<int, int> pii;
 typedef pair<int, pii> piii;
 
+// Esta implmentacion usando Union-Find es ligeramente mas rapida
 const int maxn = 200005;
 int components;
 vector<int> leader(maxn), sizen(maxn);
 
+// - op = 0 para decir que llegamos al anterior persist
+// - u es el vertice cuyo lider cambiamos
+// - len es el tamaño del vertice hacia el cual enviamos el componente
+// que lideraba u
+// - from es el vertice que ahora va a liderar a u
 struct change{
     bool op;
     int u, len, from;
@@ -49,11 +55,11 @@ void rollback(stack<change>& st){
         int len = st.top().len, from = st.top().from;
         st.pop();
 
-        if(!op) break;
+        if(!op) break; // Si !op quiere decir que llegamos al anterior persist
         
-        sizen[from] = len;
-        leader[u] = u;
-        components++;
+        sizen[from] = len; // Recuperar la talla que tenia from antes del join que estamos eliminando
+        leader[u] = u; // Ahora u vuelve a ser su propio lider, como antes del join
+        components++; // Siempre que deshago una union quiere decir que dividi un componente
     }
 }
 

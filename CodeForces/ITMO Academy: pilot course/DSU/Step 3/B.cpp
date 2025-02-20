@@ -10,8 +10,7 @@ typedef pair<int, pii> piii;
 
 const int maxn = 50005;
 int components;
-vector<int> leader(maxn);
-unordered_set<int> sets[maxn];
+vector<int> leader(maxn), sizen(maxn);
 
 int block_size;
 
@@ -23,55 +22,57 @@ struct Query {
     }
 };
 
+struct change{
+    bool op;
+    int u, len, from;
+};
+
 void initDSU(int n){
     components = n;
     for(int i = 1; i <= n; i++){
         leader[i] = i;
-        sets[i].clear();
-        sets[i].insert(i);
+        sizen[i] = 1;
     }
 }
 
-void join(int u, int v, stack<pair<bool, piii>>& st, bool tipo){
-    int leaderU = leader[u], leaderV = leader[v];
-    if(leaderU != leaderV){
-        if(sets[leaderV].size() > sets[leaderU].size())
-            swap(leaderU, leaderV);
-        
-        for(int v : sets[leaderV]){
-            leader[v] = leaderU;
-            if(tipo) st.push({1, {v, {leaderV, leaderU}}});
-            sets[leaderU].insert(v);
-        }
-        sets[leaderV].clear();
+int find(int u){
+    if(leader[u] == u) return u;
+    return find(leader[u]);
+}
+
+void join(int u, int v, stack<change>& st){
+    u = find(u); v = find(v);
+    if(u != v){
+        if(sizen[v] > sizen[u])
+            swap(u, v);
+        leader[v] = u;
+        st.push({1, v, sizen[u], u});
+        sizen[u] += sizen[v];
         components--;
     }
 }
 
-// EL rollback sirve para devolver el DSU a un estado previo
-void rollback(stack<pair<bool, piii>>& st){
+void rollback(stack<change>& st){
     while(!st.empty()){
-        bool op = st.top().first;
-        int u = st.top().second.first;
-        int to = st.top().second.second.first, from = st.top().second.second.second;
+        bool op = st.top().op;
+        int u = st.top().u;
+        int len = st.top().len, from = st.top().from;
         st.pop();
-        if(!op){
-            components = u;
-            break;
-        }
-        // Devolvemos cada vertice a su anterior componente
-        sets[from].erase(u);
-        sets[to].insert(u);
-        leader[u] = to;
+
+        if(!op) break;
+        
+        sizen[from] = len;
+        leader[u] = u;
+        components++;
     }
 }
 
-void persist(stack<pair<bool, piii>>& st){
-    st.push({0, {components, {0, 0}}});
+void persist(stack<change>& st){
+    st.push({0, 0, 0, 0});
 }
 
 void solver(){
-    stack<pair<bool, piii>> st;
+    stack<change> st1, st2;
     int n, m; cin>>n>>m;
     block_size = sqrt(m) + 1;
     vector<pii> edges(m+1);
@@ -88,12 +89,12 @@ void solver(){
     }
 
     vector<int> ans(q);
+    initDSU(n);
     for(int i = 0; i < block_size; i++){
         if(blocks[i].empty()) continue;
         int len = blocks[i].sz;
         sort(blocks[i].begin(), blocks[i].end());
         int j = 0;
-        initDSU(n);
 
         // Esta parte al parecer ya esta bien
         // Inicialmente vamos a evaluar individualmente las queries en 
@@ -101,30 +102,32 @@ void solver(){
         int maxRange = (i+1)*block_size;
         while(j < len && blocks[i][j].r < maxRange){
             int l = blocks[i][j].l, r = blocks[i][j].r, id = blocks[i][j].id;
-            persist(st);
+            persist(st1);
             for(int edge = l; edge <= r; edge++){
-                join(edges[edge].first, edges[edge].second, st, 1);
+                join(edges[edge].first, edges[edge].second, st1);
             }
             
             ans[id] = components;
-            rollback(st);
+            rollback(st1);
             j++;
         }
 
         int lastR = maxRange - 1;
+        persist(st2);
         for(; j < len; j++){
             while(lastR < blocks[i][j].r){
                 lastR++;
-                join(edges[lastR].first, edges[lastR].second, st, 0);
+                join(edges[lastR].first, edges[lastR].second, st2);
             }
             
-            persist(st);
+            persist(st1);
             for(int l = maxRange - 1; l >= blocks[i][j].l; l--)
-                join(edges[l].first, edges[l].second, st, 1);
+                join(edges[l].first, edges[l].second, st1);
 
             ans[blocks[i][j].id] = components;
-            rollback(st);
+            rollback(st1);
         }
+        rollback(st2);
     }
 
     for(int i = 0; i < q; i++) cout<<ans[i]<<endl;
