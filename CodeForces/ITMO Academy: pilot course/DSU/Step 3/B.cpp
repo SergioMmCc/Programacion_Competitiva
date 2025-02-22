@@ -96,7 +96,6 @@ void solver(){
         sort(blocks[i].begin(), blocks[i].end());
         int j = 0;
 
-        // Esta parte al parecer ya esta bien
         // Inicialmente vamos a evaluar individualmente las queries en 
         // las que tanto l como r estan dentro del rango
         int maxRange = (i+1)*block_size;
