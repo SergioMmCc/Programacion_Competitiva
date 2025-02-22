@@ -16,11 +16,12 @@ void solver(){
 
         if(op == "VISIT"){
             backward.push(current);
+            while(!forward.empty()) forward.pop();
             cin>>current;
         }
         else if(op == "BACK"){
             if(backward.empty()){
-                cout<<"IGNORED"<<endl;
+                cout<<"Ignored"<<endl;
                 continue;
             }
 
@@ -30,7 +31,7 @@ void solver(){
         }
         else{ // op == "FORWARD"
             if(forward.empty()){
-                cout<<"IGNORED"<<endl;
+                cout<<"Ignored"<<endl;
                 continue;
             }
 
@@ -38,6 +39,8 @@ void solver(){
             current = forward.top();
             forward.pop();
         }
+
+        cout<<current<<endl;
     }
 }
 
