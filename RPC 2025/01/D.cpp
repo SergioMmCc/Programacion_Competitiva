@@ -19,7 +19,6 @@ void solver(){
     }
 
     while(!lados.empty()){
-        // cout<<"here"<<endl;
         int minx = lados.begin()->first;
         while(lados[minx].sz > 1){
             set<int>::iterator it1 = lados[minx].begin(), it2 = --lados[minx].end();
@@ -38,7 +37,6 @@ void solver(){
             if(alturas[miny].empty()) alturas.erase(miny);
 
             area = (maxx - minx) * (maxy - miny);
-            // cout<<"maxx -> "<<maxx<<" minx -> "<<minx<<" maxy -> "<<maxy<<" miny -> "<<miny<<endl;
         }
 
         if(lados[minx].empty()) lados.erase(minx);
@@ -67,11 +65,7 @@ void solver(){
             // Ahora el calculo de esa area
             area = sqrt(((maxx - xd) * (maxx - xd) + (yr - miny) * (yr - miny)) * 
                         ((maxx - xu) * (maxx - xu) + (maxy - yr) * (maxy - yr)));
-            // cout<<"maxx -> "<<maxx<<" yr -> "<<yr<<" xd -> "<<xd<<" miny -> "<<miny<<endl;
-            // cout<<"xu -> "<<xu<<" maxy -> "<<maxy<<" minx -> "<<minx<<" yl -> "<<yl<<endl;
         }
-
-        // cout<<area<<endl;
     }
 
     cout<<area<<endl;
