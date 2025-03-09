@@ -55,7 +55,6 @@ void dijkstra2(int source, int n, ll l, vector<ll>& d1, vector<ll>& d2, map<pii,
             if(!w2){
                 w2 = 1;
                 if(w2 + w1 + d1[v] < l) w2 = l - w1 - d1[v];
-                // cout<<"u -> "<<u<<" v -> "<<v<<" w2 -> "<<w2<<" w1 -> "<<w1<<" d1[v] -> "<<d1[v]<<endl;
                 if(edges.find({u, v}) == edges.end()) edges[{v, u}] = w2;
                 else edges[{u, v}] = w2;
             }
