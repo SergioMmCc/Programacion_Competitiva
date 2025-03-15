@@ -30,7 +30,6 @@ void solver(){
     for(int i = 0; i < n; i++){
         string aux; cin>>aux;
         ll num = stringToInt(aux);
-        // cout<<num<<endl;
         total += num;
         if(num % 5 == 1) total -= 1;
         else if(num % 5 == 2) total -= 2;
@@ -38,7 +37,6 @@ void solver(){
         else if(num % 5 == 4) count4++;
     }
 
-    // cout<<count3<<' '<<count4<<endl;
     ll mini = min(count3, count4);
     total -= 2 * mini;
     count3 -= mini; count4 -= mini;
