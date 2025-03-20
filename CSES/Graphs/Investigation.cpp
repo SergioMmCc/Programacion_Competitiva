@@ -8,7 +8,7 @@ using ld = long double;
 typedef pair<int, ll> pil;
 
 const int maxn = 1e5 + 1;
-const ll inf = 1e15;
+const ll inf = 1e15, mod = 1e9 + 7;
 vector<vector<pil>> graph(maxn);
 
 struct comp{
@@ -18,9 +18,12 @@ struct comp{
 };
 
 // Complejidad O(m*log(n))
-void dijkstra(int source, int n, vector<ll>& d){
+void dijkstra(int source, int n, vector<ll>& d, vector<ll>& formas, vector<int>& mini, vector<int>& maxi){
     for(int i = 1; i <= n; i++) d[i] = inf;
     d[source] = 0;
+    formas[source] = 1;
+    mini[source] = 0;
+    maxi[source] = 0;
     priority_queue<pil, vector<pil>, comp> pq;
     pq.push({source, 0});
     while(!pq.empty()){
@@ -31,22 +34,32 @@ void dijkstra(int source, int n, vector<ll>& d){
             int v = edge.first; ll w2 = edge.second;
             if(d[v] > w1 + w2){
                 d[v] = w1 + w2;
+                formas[v] = formas[u];
+                mini[v] = mini[u] + 1;
+                maxi[v] = maxi[u] + 1;
                 pq.push({v, d[v]});
+            }
+
+            else if(d[v] == w1 + w2){
+                formas[v] = (formas[v] + formas[u]) % mod;
+                mini[v] = min(mini[v], mini[u] + 1);
+                maxi[v] = max(maxi[v], maxi[u] + 1);
             }
         }
     }
 }
 
 void solver(){
-    int n, m, s; cin>>n>>m>>s;
+    int n, m; cin>>n>>m;
     for(int i = 0; i < m; i++){
         int u, v; ll w;
         cin>>u>>v>>w;
         graph[u].push_back({v, w});
-        graph[v].push_back({u, w});
     }
-    vector<ll> d(n+1);
-    dijkstra(s, n, d);
+    vector<ll> d(n+1), formas(n+1);
+    vector<int> mini(n+1), maxi(n+1);
+    dijkstra(1, n, d, formas, mini, maxi);
+    cout<<d[n]<<' '<<formas[n]<<' '<<mini[n]<<' '<<maxi[n]<<endl;
 }
 
 int main(){
