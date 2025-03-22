@@ -1,26 +1,13 @@
 # Competitive Programming
 
-This repository contains proposed solutions by `Sergio Moncada` and `Diego Rangel` for exercises from various RPC, ICPC, and Universidad Tecnologica de Pereira UTP competitions. Additionally, it includes the algorithms used to solve some of these exercises.
+This repository contains proposed solutions by `Sergio Moncada` for exercises from various RPC, ICPC, and Universidad Tecnologica de Pereira UTP competitions. Additionally, it includes the algorithms used to solve some of these exercises.
 
 ## Competitions
 * UTP Open 2018
-* Latin American Regional 2023
+* Latin American Regional
 * Caribbean Regional 2023
 * UTP Open 2023
-* RPC 09, 10, 11, and 12 2023
-
-## Algorithms Used
-* Binary Search
-* MergeSort
-* Priority Queue
-* Red-Black Trees
-* Dijkstra
-* Prim
-* BFS
-* DFS
-* Sieve of Eratosthenes
-* Stacks
-* Queues
+* RPC
 
 ## Languages Used
 * C
@@ -28,6 +15,6 @@ This repository contains proposed solutions by `Sergio Moncada` and `Diego Range
 * Python
 
 ## About Us
-We are Sergio Moncada and Diego Rangel, Systems Engineering students at `Universidad Tecnologica de Pereira UTP`. We are part of the competitive programming team `UTP - CodeDeGrace`.
+I am Sergio Moncada, Systems Engineering student at `Universidad Tecnologica de Pereira UTP`. I'm part of the competitive programming team `UTP - CodeDeGrace`.
 
-We began our journey in competitive programming in the 2023 - II semester. Our goal is to qualify for future `ICPC programming world finals` in the years 2025 and 2026.
+I began my journey in competitive programming in the 2023 - II semester. My goal is to qualify for future `ICPC programming world finals` in the years 2026 and 2027.
