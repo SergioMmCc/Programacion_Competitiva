@@ -24,12 +24,9 @@ struct comp{
 
 // Algoritmo de Prim para hallar el Minimal Spanning Tree de un grafo no dirigido y conexo
 // Complejidad O(m * lg(n))
-void prim(int source, int n, vector<ll>& d, vector<int>& parent){
+void prim(int source, int n, vector<ll>& d){
     vector<bool> inQueue(n+1, 1);
-    for(int i = 1; i <= n; i++){
-        d[i] = inf;
-        parent[i] = -1;
-    }   
+    for(int i = 1; i <= n; i++) d[i] = inf;
     d[source] = 0;
     priority_queue<pil, vector<pil>, comp> pq;
     pq.push({source, 0});
@@ -42,7 +39,6 @@ void prim(int source, int n, vector<ll>& d, vector<int>& parent){
             int v = edge.fi; ll w = edge.se;
             if(inQueue[v] && d[v] > w){
                 d[v] = w;
-                parent[v] = u;
                 pq.push({v, d[v]});
             }
         }
@@ -59,13 +55,16 @@ int main() {
         graph[v].push_back({u, w});
     }
     vector<ll> d(n+1);
-    vector<int> parent(n+1);
-    prim(1, n, d, parent);
+    prim(1, n, d);
     
-    //Para calcular el peso total en el MST
     ll totalWeight = 0;
-    for(int i = 1; i <= n; i++)
+    for(int i = 1; i <= n; i++){
+        if(d[i] == inf){
+            cout<<"IMPOSSIBLE"<<endl;
+            return 0;
+        }
         totalWeight += d[i];
+    }
     cout<<totalWeight<<endl;
 
     return 0;
