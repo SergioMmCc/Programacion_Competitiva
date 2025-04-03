@@ -5,7 +5,7 @@ using namespace std;
 const int mod = 1e9 + 7;
 int dp[101][1000001];
 vector<int> coins(101);
- 
+
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(NULL);
     
@@ -18,7 +18,7 @@ int main(){
         for(int j = 0; j <= x; j++){
             dp[i][j] = dp[i-1][j];
             if(j - coins[i-1] >= 0){
-                dp[i][j] += dp[i][j - coins[i-1]];
+                dp[i][j] += dp[i-1][j - coins[i-1]];
                 dp[i][j] %= mod;
             }
         }
