@@ -9,12 +9,12 @@ using ld = long double;
 #define se second
 typedef pair<int, int> pii;
 
-const ll mod = 1e18 + 3;
+const ll mod = (ll)1e18 + 3;
 
 ll myPor(ll b, ll e){
     ll result = 0;
-    while(e) {
-        if (e & 1)
+    while(e){
+        if(e & 1)
             result = ((b % mod) + (result % mod)) % mod;
         b = ((b % mod) + (b % mod)) % mod;
         e >>= 1;

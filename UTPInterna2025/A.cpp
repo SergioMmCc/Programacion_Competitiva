@@ -10,9 +10,10 @@ typedef pair<int, int> pii;
 void solver() {
     ll n, a, b, x;
     cin>>n>>a>>b>>x;
-    ld nu = (ld)n, au = (ld)a, bu = (ld)b, xu = (ld)x;
-    ld ans = nu * (au * 0.5 + bu * 0.5 + xu * 0.2);
-    cout<<fixed<<setprecision(4)<<ans<<endl;
+    a *= 5; b *= 5; x *= 2;
+    ll num = n * (a + b + x);
+    ld ans = (ld)num / 10.0;
+    cout<<fixed<<setprecision(1)<<ans<<endl;
 }
 
 int main(){
