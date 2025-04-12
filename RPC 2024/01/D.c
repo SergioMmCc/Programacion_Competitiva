@@ -8,7 +8,7 @@ int main () {
 
     scanf ("%s", word);
     longitud = strlen(word);
-    for (int i = 0; i <= longitud; i++) {
+    for (int i = 0; i < longitud; i++) {
         A[i+1] = A[i];
         T[i+1] = T[i];
         G[i+1] = G[i];
