@@ -8,9 +8,9 @@ using ld = long double;
 #define fi first
 #define se second
 typedef pair<int, int> pii;
-typedef pair<ld, int> pdi;
+typedef pair<ld, ld> pdd;
 
-int tonum(string s){
+ld tonum(string s){
     int ans=0, k=1000;
     bool b=0;
     for(char i : s){
@@ -22,76 +22,83 @@ int tonum(string s){
         ans += i-'0';
         if(b) k /= 10;
     }
-    return ans*k;
+    return (ld)ans*k / 1000.0;
 }
 
 int main () {
     ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0);
 
     // x * 1000;
-    int n; string s;
-    cin>>n>>s;
-    int p = tonum(s);
-    vector<pdi> vec(n+1);
-    int num;
+    int n; string sp; cin>>n>>sp;
+    ld p = tonum(sp);
+
+    vector<pdd> vec;
     ld ans = 0.0;
-    for(int i=0; i<n; i++){
-        cin>>num>>s;
-        int aux = tonum(s);
-        if(aux == p){
-            ans += (ld)num;
-            num = 0;
-        }
-        vec[i] = {(ld)num, aux};
+    for(int i = 0; i<n; i++){
+        int num; string s; cin>>num>>s;
+        ld aux = tonum(s);
+        if(aux == p) ans += (ld)num;
+        else vec.pb({aux, (ld)num});
     }
 
-    // for(int i=0; i<n; i++){
-    //     cout<<vec[i].first<<", "<<vec[i].second<<"\n";
-    // }
+    sort(vec.begin(), vec.end());
 
-    vector<pair<ld, pii>> comp;
-    for(int i = 0; i < n - 1; i++){
-        if(vec[i].se == p) continue;
-        for(int j = i + 1; j <= n; j++){
-            if(vec[j].se == p) continue;
-            if((vec[i].se > p && vec[j].se > p) || (vec[i].se < p && vec[j].se < p)) continue;
-            int mayor = abs(p - vec[i].se), menor = abs(p - vec[j].se);
+    // Poner primero los menores a p
+    ld aux = 0.0, pp = 0.0;
+    for(int i = 0; i < vec.sz; i++){
+        ld num = vec[i].se, r = vec[i].fi;
 
-            int auxI = i, auxJ = j;
-            if(menor > mayor){
-                swap(auxI, auxJ);
-                swap(mayor, menor);
-            }
-            ld r = (ld)menor / (ld)mayor;
-            if(r == 0.0) continue;
-            comp.pb({r, {auxI, auxJ}});
+        if(r < p){
+            aux += num;
+            pp += num * r;
         }
-    }
 
-    sort(comp.begin(), comp.end());
-    reverse(comp.begin(), comp.end());
-
-    // cout<<ans<<endl;
-    for(int k = 0; k < comp.sz; k++){
-        ld r = comp[k].fi; int i = comp[k].se.fi, j = comp[k].se.se;
-        ld avMayor = vec[i].fi, avMenor = vec[j].fi;
-
-        ld ir = 1.0 / r;
-
-
-        // cout<<"k -> "<<k<<" i -> "<<i<<" avMayor -> "<<avMayor<<" j -> "<<j<<" avMenor -> "<<avMenor<<" r -> "<<r<<" ir -> "<<ir<<" ans -> "<<ans<<endl;
-
-        if(avMayor > r * avMenor){
-            // cout<<"here"<<endl;
-            ans += r * avMenor; vec[i].fi -= r * avMenor;
-            ans += avMenor; vec[j].fi = 0.0;
-        }
         else{
-            ans += ir * avMayor; vec[j].fi -= ir * avMayor;
-            ans += avMayor; vec[i].fi = 0.0;
-        }
+            // Agregar todo
+            if((pp + num * r) / (aux + num) <= p){
+                aux += num;
+                pp += num * r;
+            }
 
+            // Agregar lo maximo para que sea == p
+            else{
+                aux += (aux * p - pp) / (r - p);
+                pp = p;
+                break;
+            }
+        }
     }
 
+    if(pp == p) aux += ans;
+    else aux = ans;
+
+    // Poner primero los mayores a p
+    ld aux2 = 0.0, pp2 = 0.0;
+    for(int i = (int)vec.sz - 1; i >= 0; i--){
+        ld num = vec[i].se, r = vec[i].fi;
+
+        if(r > p){
+            aux2 += num;
+            pp2 += num * r;
+        }
+
+        else{
+            if((pp2 + num * r) / (aux2 + num) >= p){
+                aux2 += num;
+                pp2 += num * r;
+            }
+
+            else{
+                aux2 += (aux2 * p - pp2) / (r - p);
+                pp2 = p;
+                break;
+            }
+        }
+    }
+
+    if(pp2 == p) aux2 += ans;
+    else aux2 = ans;
+
+    ans = max(aux, aux2);
     cout<<fixed<<setprecision(5)<<ans<<endl;
 }
