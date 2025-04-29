@@ -13,7 +13,7 @@ void solver(){
     int r, c; cin>>r>>c;
 
     vector<string> s(r);
-    for(int i = 0; i < r; i++) cin>>r;
+    for(int i = 0; i < r; i++) cin>>s[i];
 
     char ans[r][c];
     for(int i = 0; i < r; i++){
@@ -24,20 +24,25 @@ void solver(){
 
     int count = 0;
     for(int i = 0; i < r; i++){
-        int len = s[i].sz;
-        if(c - len % 2){
+        int len = s[i].sz, skip;
+        if((c - len) % 2){
             count++;
-            if(count % 2){
-                
-            }
+            skip = (c - len) / 2;
+            if(!(count % 2)) skip++;
         }
 
-        else{
-            int skip = (c - len) / 2;
-            for(int j = skip, k = 0; k < len; j++, k++){
-                ans[i][j] = s[i][k];
-            }
+        else skip = (c - len) / 2;
+
+        for(int j = skip, k = 0; k < len; j++, k++){
+            ans[i][j] = s[i][k];
         }
+    }
+
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++){
+            cout<<ans[i][j];
+        }
+        cout<<endl;
     }
 }
 
