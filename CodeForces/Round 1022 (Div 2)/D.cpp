@@ -8,54 +8,59 @@ using ld = long double;
 #define se second
 typedef pair<int, int> pii;
 
+void pans(int a, int b){
+    cout<<"! "<<a<<' '<<b<<endl;
+}
+
+void nans(){
+    cout<<"! -1"<<endl;
+}
+
+int ask(int a, vector<int>& val){
+    if(val[a]) return val[a];
+    cout<<"? "<<a<<endl;
+    cin>>val[a];
+    return val[a];
+}
+
 void solver(){
     int n, k; cin>>n>>k;
     if(n == 2*k){
-        cout<<"! "<<k<<' '<<k<<endl;
+        pans(k, k);
         return;
     }
     if(k == 1){
-        cout<<"! -1"<<endl;
+        nans();
         return;
     }
+
+    vector<int> val(n+1);
     vector<int> a(k+1), b(k+1);
-    for(int i = 1; i <= k; i++){
-        cout<<"? "<<i<<endl;
-        cin>>a[i];
-    }
+    for(int i = 1; i <= k; i++) a[i] = ask(i, val);
 
     int x = n / k;
     for(int i = 1; i <= k; i++){
         int j = x * k + i;
         if(j > n) j -= k;
-        cout<<"? "<<j<<endl;
-        cin>>b[i];
+        b[i] = ask(j, val);
     }
 
     int c = 0;
     for(int i = 1; !c && i <= k; i++){
-        // cout<<"i -> "<<i<<endl;
-        // cout<<"a -> "<<a[i]<<" b -> "<<b[i]<<endl;
         if(a[i] != b[i]) c = i;
     }
 
     if(!c){
-        cout<<"! -1"<<endl;
+        nans();
         return;
     }
     
-    // cout<<"x -> "<<x<<" c -> "<<c<<endl;
-    // Aqui el problema
     int l = 0, r = x - 1;
     int s = -1;
     while(s == -1){
         int ml = (l + r) / 2; int mr = ml + 1;
 
-        int ans1, ans2;
-        cout<<"? "<<k * ml + c<<endl;
-        cin>>ans1;
-        cout<<"? "<<k * mr + c<<endl;
-        cin>>ans2;
+        int ans1 = ask(k * ml + c, val), ans2 = ask(k * mr + c, val);
 
         if(ans1 == ans2){
             if(ans1 == a[c]){
@@ -70,17 +75,17 @@ void solver(){
         }
     }
 
-    // Esto tambien esta mal
-    for(int i = k*s + c + 1, aux = c+1; i <= k*s + c + k; i++, aux++){
-        cout<<"? "<<i<<endl;
-        int ans; cin>>ans;
-        int j = aux % k;
-        if(!j) j += k;
-        if(ans != a[j]){
-            cout<<"! "<<i-1<<' '<<n - i + 1<<endl;
-            return;
-        }
-    }
+    l = s*k + c; r = (s+1)*k + c;
+    while(ask(l, val) == a[l % k == 0 ? k : l % k]) l++;
+    l--;
+
+    while(ask(r, val) == b[r % k == 0 ? k : r % k]) r--;
+    r++;
+
+    r = max(k+1, r);
+    l = min(n - k, l);
+    if(l + 1 == r) pans(l, n - l);
+    else nans();
 }
 
 int main(){
