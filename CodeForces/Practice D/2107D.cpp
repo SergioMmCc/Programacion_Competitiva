@@ -46,10 +46,8 @@ piii diameter(int s, vector<int>& parent){
     int r = maxi.se, dis = maxi.fi + 1;
     
     // Reconstruir el camino para desactivar los nodos y crear los siguientes subtrees
-    // Aqui el TLE
     int u = r, last = -1;
     while(u != -1){
-        // cout<<"u -> "<<u<<endl;
         act[u] = 0;
 
         last = u;
