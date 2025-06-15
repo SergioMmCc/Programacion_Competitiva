@@ -7,76 +7,83 @@ using ld = long double;
 #define sz size()
 #define fi first
 #define se second
-typedef pair<int, ll> pil;
-typedef pair<pil, int> pili;
-typedef pair<pil, pili> pilili;
+typedef pair<int, int> pii;
+typedef pair<ll, int> pli;
+typedef pair<pli, int> plii;
 
-const int maxn = 1e5 + 1;
+const int maxn = 1e5 + 5;
 const ll inf = 1e18;
-vector<vector<pili>> graph(maxn);
-vector<int> degree(maxn);
-vector<map<int, ll>> adj(maxn);
 
-struct comp{
-    bool operator() (pilili a, pilili b){
-        if(a.fi.se == b.fi.se) return a.se.fi.se > b.se.fi.se;
-        return a.fi.se > b.fi.se;
-    }
-};
+map<int, vector<pli>> graph[maxn];
+map<int, ll> pSum[maxn];
+vector<ll> dp1(maxn, inf);
+map<int, ll> dp2[maxn];
 
-// Complejidad O(m*log(n))
-ll dijkstra(int n){
-    vector<ll> d(n+1, inf);
-    d[1] = 0;
-    priority_queue<pilili, vector<pilili>, comp> pq;
-    pq.push({{1, 0}, {{-1, 0}, -1}});
+void dijkstra(){
+    dp1[1] = 0;
+    priority_queue<plii> pq;
+    pq.push({{0, 1}, 0});
+
     while(!pq.empty()){
-        int u = pq.top().fi.fi, lastC = pq.top().se.fi.fi, pa = pq.top().se.se; ll w1 = pq.top().fi.se, change = pq.top().se.fi.se;
-        pq.pop();
-        if(!degree[u]) continue;
-        degree[u]--;
+        int u = pq.top().fi.se, c = pq.top().se; ll w1 = -1 * pq.top().fi.fi; pq.pop();
 
-        // cout<<"u -> "<<u<<" w1 -> "<<w1<<" parent -> "<<pa<<" color -> "<<lastC<<" change -> "<<change<<endl;
-
-        for(pili edge : graph[u]){
-            int v = edge.fi.fi, c = edge.se; ll w2 = edge.fi.se;
-            if(pa == v) continue;
-
-            // cout<<"\tv -> "<<v<<" w2 -> "<<w2<<" c -> "<<c<<" adj -> "<<adj[u][c]<<endl;
-
-            if(c == lastC){
-                ll tw = w1 + adj[u][c] - change - w2;
-                d[v] = min(d[v], tw);
-                pq.push({{v, tw}, {{c, 0}, u}});
-            }
-            else{
-                ll tw = w1 + adj[u][c] - w2;
-                d[v] = min(d[v], tw);
-                pq.push({{v, tw}, {{c, 0}, u}});
-            }
+        if(c){
+            if(dp2[u][c] < w1) continue;
             
-            d[v] = min(d[v], w1 + w2);
-            pq.push({{v, w1 + w2}, {{c, w2}, u}});
+            ll total = w1 + pSum[u][c];
+            for(pli edge : graph[u][c]){
+                int v = edge.se; ll w2 = edge.fi;
+                if(total - w2 < dp1[v]){
+                    dp1[v] = total - w2;
+                    pq.push({{-dp1[v], v}, 0});
+                }
+            }
+        }
+
+        else{
+            if(dp1[u] < w1) continue;
+
+            for(auto par : graph[u]){
+                int c = par.fi;
+                ll total = w1 + pSum[u][c];
+                for(pli edge : graph[u][c]){
+                    int v = edge.se; ll w2 = edge.fi;
+
+                    // Flip esa arista
+                    if(w1 + w2 < dp1[v]){
+                        dp1[v] = w1 + w2;
+                        pq.push({{-dp1[v], v}, 0});
+                    }
+
+                    // Flip las demas aristas
+                    if(total - w2 < dp1[v]){
+                        dp1[v] = total - w2;
+                        pq.push({{-dp1[v], v}, 0});
+                    }
+
+                    // Flip esa y enviar a dp2
+                    if(!dp2[v].count(c) || w1 < dp2[v][c]){
+                        dp2[v][c] = w1;
+                        pq.push({{-dp2[v][c], v}, c});
+                    }
+                }
+            }
         }
     }
-
-    return d[n];
 }
 
 void solver(){
     int n, m; cin>>n>>m;
     for(int i = 0; i < m; i++){
         int u, v, c; ll w; cin>>u>>v>>c>>w;
-        degree[u] += 2;
-        degree[v] += 2;
-        adj[u][c] += w;
-        adj[v][c] += w;
-        graph[u].pb({{v, w}, c});
-        graph[v].pb({{u, w}, c});
+        pSum[u][c] += w;
+        pSum[v][c] += w;
+        graph[u][c].pb({w, v});
+        graph[v][c].pb({w, u});
     }
 
-    ll ans = dijkstra(n);
-    cout<<(ans == inf ? -1 : ans)<<endl;
+    dijkstra();
+    cout<<(dp1[n] == inf ? -1 : dp1[n])<<endl;
 }
 
 int main(){
