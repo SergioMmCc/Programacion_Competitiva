@@ -22,22 +22,18 @@ void solver(){
     int ans = 0;
     for(int i = 1; i <= n; i++){
         if(a[i] > x){
-            // cout<<"clear"<<endl<<endl;
             sum.clear();
             continue;
         }
         
         if(a[i] == x){
-            // cout<<"add -> "<<ps[i-1]<<endl;
             sum[ps[i-1]]++;
             for(int j = i - 1; a[j] < x && j > 0; j--){
-                // cout<<"j -> "<<j<<" a[j] -> "<<a[j]<<" add -> "<<ps[j-1]<<endl;
                 sum[ps[j-1]]++;
             }
         }
 
         if(sum.count(ps[i] - s)) ans += sum[ps[i] - s];
-        // cout<<"i -> "<<i<<" ans -> "<<ans<<endl<<endl;
     }
 
     cout<<ans<<endl;
