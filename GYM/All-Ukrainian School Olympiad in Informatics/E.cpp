@@ -21,8 +21,6 @@ void solver(){
         ans += (n - 1) * (x[i] * x[i] + y[i] * y[i]);
     }
 
-    // cout<<ans<<endl;
-
     for(int i = 1; i <= n; i++){
         ans -= 2 * x[i] * (px[n] - px[i]);
         ans -= 2 * y[i] * (py[n] - py[i]);
