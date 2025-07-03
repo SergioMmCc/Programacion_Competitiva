@@ -9,14 +9,9 @@ using ld = long double;
 #define se second
 typedef pair<int, int> pii;
 
-const int mod = 1e9 + 7;
-
+const int mod = 1e9 + 7, maxn = 20;
+int dp[maxn][1 << maxn];
 vector<vector<int>> graph(20);
-vector<int> pot2(21);
-void calcPot2(){
-    pot2[0] = 1;
-    for(int i = 1; i < 21; i++) pot2[i] = pot2[i-1] * 2;
-}
 
 void solver(){
     int n, m; cin>>n>>m;
@@ -26,27 +21,23 @@ void solver(){
         graph[u].pb(v);
     }
 
-    int lim = pot2[n];
+    int lim = 1 << n;
     // cout<<n<<' '<<lim<<endl;
-    vector<vector<int>> dp(n, vector<int>(lim));
     dp[0][1] = 1;
-    for(int i = 0; i < n; i++){
-        for(int j = 1; j < lim; j++){
+    for(int j = 1; j < lim; j++){
 
-            cout<<"i -> "<<i<<" j -> "<<j<<" dp -> "<<dp[i][j]<<endl;
-            vector<bool> vis(n);
-            int aux = j;
-            for(int k = 0; k < n; k++){
-                if(aux % 2) vis[k] = 1;
-                aux >>= 1;
-            }
+        // Estos 2 ifs eliminan muchas posibilidades, así que pueden ayudar a evitar TLE
+        if(!(j & 1)) continue;
+        if(j & (1 << (n-1)) && j < lim - 1) continue;
 
-            if(!vis[i]) continue;
+        for(int i = 0; i < n; i++){
+
+            if(!(j & (1 << i))) continue;
 
             for(int v : graph[i]){
-                if(vis[v]) continue;
-                dp[v][j + pot2[v]] += dp[i][j];
-                dp[v][j + pot2[v]] %= mod;
+                if(j & (1 << v)) continue;
+                dp[v][j | (1 << v)] += dp[i][j];
+                dp[v][j | (1 << v)] %= mod;
                 // cout<<"sum -> "<<" v -> "<<v<<" valor -> "<<lim+pot2[v]
             }
         }
@@ -56,8 +47,7 @@ void solver(){
 }
 
 int main(){
-    ios_base::sync_with_stdio(0);cin.tie(NULL);
-    calcPot2();
+    ios_base::sync_with_stdio(0);cin.tie(NULL);cout.tie(NULL);
     int t = 1;
     // cin>>t;
     while(t--){
