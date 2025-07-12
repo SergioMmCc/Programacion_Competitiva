@@ -38,13 +38,6 @@ void solver(){
     vector<ll> h(lt), ph(lt);
     precalc_hashing(t, h, ph);
 
-    // if(s[0] == '1'){
-    //     for(int i = 0; i < ls; i++){
-    //         if(s[i] == '0') s[i] = '1';
-    //         else s[i] = '0';
-    //     }
-    // }
-
     int c0 = 0, c1 = 0;
     for(int i = 0; i < ls; i++){
         if(s[i] == '0') c0++;
@@ -56,8 +49,6 @@ void solver(){
         if(((ll)lt - (ll)c1 * (ll)y) % (ll)c0) continue;
         ll x = ((ll)lt - (ll)c1 * (ll)y) / (ll)c0;
         if(x <= 0) continue;
-
-        // cout<<"x -> "<<x<<" y -> "<<y<<" c0 -> "<<c0<<" c1 -> "<<c1<<endl;
 
         int l = 0;
         ll r0 = larg, r1 = larg;
@@ -86,7 +77,6 @@ void solver(){
             }
 
             if(s[i] == '0'){
-                // cout<<"r0 -> "<<r0<<" comp -> "<<queries(l, l + x - 1, h, ph)<<endl;
                 if(r0 != queries(l, l + x - 1, h, ph)) cond = 0;
                 else l += x;
             }
