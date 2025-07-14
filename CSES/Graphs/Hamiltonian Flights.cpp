@@ -22,13 +22,12 @@ void solver(){
     }
 
     int lim = 1 << n;
-    // cout<<n<<' '<<lim<<endl;
     dp[0][1] = 1;
     for(int j = 1; j < lim; j++){
 
         // Estos 2 ifs eliminan muchas posibilidades, así que pueden ayudar a evitar TLE
-        if(!(j & 1)) continue;
-        if(j & (1 << (n-1)) && j < lim - 1) continue;
+        if(!(j & 1)) continue; // Si no he pasado por la fuente (1 << s)
+        if(j & (1 << (n-1)) && j < lim - 1) continue; // Si llego al destino sin haber pasado por los demas (1 << d)
 
         for(int i = 0; i < n; i++){
 
@@ -38,7 +37,6 @@ void solver(){
                 if(j & (1 << v)) continue;
                 dp[v][j | (1 << v)] += dp[i][j];
                 dp[v][j | (1 << v)] %= mod;
-                // cout<<"sum -> "<<" v -> "<<v<<" valor -> "<<lim+pot2[v]
             }
         }
     }
