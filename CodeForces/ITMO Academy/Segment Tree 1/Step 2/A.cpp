@@ -8,71 +8,81 @@ using ld = long double;
 #define fi first
 #define se second
 typedef pair<int, int> pii;
-const int maxn = 100001;
 
-struct Range{
+struct Node{
     ll seg, pref, suf, sum;
 };
 
-vector<Range> tree(4 * maxn + 1);
-int n;
+const int maxn = 1e5 + 1;
+const ll ninf = -1e18;
+vector<Node> tree(4*maxn);
 
-// 0-index
-/*
-    Tambien podemos calcular multiplicaciones (incluyendo multiplicacion modular y
-    multiplicacion de matrices), operaciones bitwise como and (&), or (|) y xor (^),
-    gcd y cualquier operacion que cumpla con la propiedad asociativa
-*/
-void buildTree(vector<ll>& a){
-    for (int i = 0; i < n; i++) tree[i + n] = {a[i], a[i], a[i], a[i]};
-    for (int i = n - 1; i > 0; --i){
-        int l = i << 1, r = (i << 1) ^ 1;
-        tree[i].seg = max(max(tree[i << 1], tree[(i << 1) ^ 1]), 
-        tree[i].sum = tree[i << 1].sum + tree[(i << 1) ^ 1].sum;
-    }
-    // i << 1 es el hijo izquierdo, (i << 1) ^ 1 es el hijo derecho
-}
+Node op(Node a, Node b){
+    Node ans;
+    ans.seg = max(0LL, max(max(a.seg, b.seg), a.suf + b.pref));
+    ans.pref = max(0LL, max(a.pref, a.sum + b.pref));
+    ans.suf = max(0LL, max(b.suf, b.sum + a.suf));
+    ans.sum = a.sum + b.sum;
 
-void updateTree(int update, ll value){
-    tree[n + update] = value;
-    update += n;
-    for (int i = update; i > 1; i >>= 1) tree[i>>1] = tree[i] + tree[i ^ 1]; //Si i es el hijo por izquierda de i/2, entonces i ^ 1 es el hijo por derecha, y viceversa
-    //i >> i -> i/2
-}
-
-// La implementacion es [l, r)
-ll query(int l, int r){
-    ll ans = 0;
-    l += n; r += n; 
-    while (l < r) {
-        if (l & 1) ans += tree[l++];
-        if (r & 1) ans += tree[--r];
-        l >>= 1; r >>= 1;
-    }
-    
     return ans;
+}
+
+void build(vector<ll>& a, int v, int tl, int tr){
+    if(tl == tr) tree[v] = {max(0LL, a[tl]), max(0LL, a[tl]), max(0LL, a[tl]), a[tl]};
+    else{
+        int tm = (tl + tr) / 2;
+        build(a, 2*v, tl, tm);
+        build(a, 2*v + 1, tm + 1, tr);
+        tree[v] = op(tree[2*v], tree[2*v + 1]);
+    }
+}
+
+// Las queries son [l, r]
+Node query(int v, int tl, int tr, int l, int r){
+    if(l > r) return {0, 0, 0, ninf};
+    if(tl == l && tr == r) return tree[v];
+
+    int tm = (tl + tr) / 2;
+    Node a = query(2*v, tl, tm, l, min(tm, r));
+    Node b = query(2*v + 1, tm + 1, tr, max(tm + 1, l), r);
+
+    return op(a, b);
+}
+
+void update(int v, int tl, int tr, int pos, ll val){
+    if(tl == tr) tree[v] = {max(0LL, val), max(0LL, val), max(0LL, val), val};
+    else{
+        int tm = (tl + tr) / 2;
+        if(pos <= tm) update(2*v, tl, tm, pos, val);
+        else update(2*v + 1, tm + 1, tr, pos, val);
+        tree[v] = op(tree[2*v], tree[2*v + 1]);
+    }
+}
+
+void solver(){
+    int n, m; cin>>n>>m;
+    vector<ll> a(n);
+    for(int i = 0; i < n; i++) cin>>a[i];
+
+    build(a, 1, 0, n - 1);
+
+    Node ans = query(1, 0, n - 1, 0, n - 1);
+    cout<<max(0LL, ans.seg)<<endl;
+
+    while(m--){
+        int idx; ll val; cin>>idx>>val;
+        update(1, 0, n - 1, idx, val);
+        ans = query(1, 0, n - 1, 0, n - 1);
+        cout<<ans.seg<<endl;
+    }
 }
 
 int main(){
     ios_base::sync_with_stdio(0);cin.tie(NULL);
-    int q; cin>>n>>q;
-    vector<ll> a;
-    for(int i = 0; i < n; i++){
-        ll save; cin>>save;
-        a.pb(save);
-    }
-    buildTree(a);
-    
-    while(q--){
-        int op; cin>>op;
-        if(op == 1){
-            int x; ll w; cin>>x>>w;
-            updateTree(x, w);
-        }
-        else{
-            int l, r; cin>>l>>r;
-            cout<<query(l, r)<<endl;
-        }
+    int t = 1;
+    // cin>>t;
+    while(t--){
+        solver();
     }
 
     return 0;
