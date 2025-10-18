@@ -1,82 +1,85 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define endl '\n'
+using ll = long long;
+using ld = long double;
+#define pb push_back
+#define sz size()
+#define fi first
+#define se second
+typedef pair<int, int> pii;
 
-struct SegTree {
-    int n;
-    vector<int> tree, setLazy, begin, end;
-    void prop(int i) {
-        if (setLazy[i] != -100) {
-            setLazy[2 * i + 1] = setLazy[2 * i] = setLazy[i];
-            tree[2 * i] = tree[2 * i + 1] =
-                setLazy[i] * (end[2 * i + 1] - begin[2 * i + 1] + 1);
-            setLazy[i] = -100;
-        }
-    }
-    SegTree(int nn) {
-        n = 1;
-        while (n < nn) n *= 2;
-        tree.resize(2 * n);
-        setLazy.resize(2 * n, -100);
-        begin.resize(2 * n);
-        end.resize(2 * n);
-        for (int i = n; i < 2 * n; i++) {
-            begin[i] = end[i] = i - n;
-        }
-        for (int i = n - 1; i > 0; i--) {
-            begin[i] = begin[2 * i];
-            end[i] = end[2 * i + 1];
-        }
-    }
-    void rangeSet(int i, int amt, int lo, int hi) {
-        if (i < n) prop(i);
-        if (begin[i] == lo && end[i] == hi) {
-            tree[i] = amt * (hi - lo + 1);
-            setLazy[i] = amt;
-            return;
-        }
-        if (begin[2 * i] <= hi && end[2 * i] >= lo) {
-            rangeSet(2 * i, amt, lo, min(hi, end[2 * i]));
-        }
-        if (begin[2 * i + 1] <= hi && end[2 * i + 1] >= lo) {
-            rangeSet(2 * i + 1, amt, max(lo, begin[2 * i + 1]), hi);
-        }
-        tree[i] = tree[2 * i] + tree[2 * i + 1];
-    }
-    int query(int i, int lo, int hi) {
-        if (i < n) prop(i);
-        if (begin[i] == lo && end[i] == hi) return tree[i];
-        int ans = 0;
-        if (begin[2 * i] <= hi && end[2 * i] >= lo) {
-            ans += query(2 * i, lo, min(end[2 * i], hi));
-        }
-        if (begin[2 * i + 1] <= hi && end[2 * i + 1] >= lo) {
-            ans += query(2 * i + 1, max(lo, begin[2 * i + 1]), hi);
-        }
-        return ans;
-    }
-};
+const int maxn = 1e5 + 1;
 
-int main (){
-    ios_base::sync_with_stdio(0);cin.tie(NULL);
+// Implementacion con array 0-index
+// Todas las operaciones se hacen inicialmente con v = 1, tl = 0, tr = n - 1
+/*
+    - Las operaciones de las updates pueden ser cualquiera que cumpla con la propiedad
+      asociativa (suma, multiplicacion, max, min, gcd, lcm, asignar), se debe tener
+      cuidado con el valor inicial (ejemplo: suma en 0, multiplicacion en 1).
+*/ 
+vector<ll> tree(4*maxn);
+vector<bool> marked(4*maxn);
 
+void push(int v){
+    if(marked[v]){
+        tree[2*v] = tree[2*v + 1] = tree[v];
+        marked[2*v] = marked[2*v + 1] = 1;
+        marked[v] = 0;
+    }
+}
+
+// Las updates son [l, r]
+void update(int v, int tl, int tr, int l, int r, ll val){
+    if(l > r) return;
+    if(tl == l && tr == r){
+        tree[v] = val;
+        marked[v] = 1;
+        return;
+    }
+
+    push(v);
+    int tm = (tl + tr) / 2;
+    update(2*v, tl, tm, l, min(tm, r), val);
+    update(2*v + 1, tm + 1, tr, max(tm + 1, l), r, val);
+}
+
+ll query(int v, int tl, int tr, int pos){
+    ll ans = tree[v];
+    
+    if(tl == tr) return ans;
+
+    push(v);
+    int tm = (tl + tr) / 2;
+    if(pos <= tm) ans = query(2*v, tl, tm, pos);
+    else ans = query(2*v + 1, tm + 1, tr, pos);
+
+    return ans;
+}
+
+void solver(){
     int n, m; cin>>n>>m;
-
-    //Inicializacion del Segment Tree
-    SegTree st(n);
 
     while(m--){
         int op; cin>>op;
         if(op == 1){
-            int l, r, v; cin>>l>>r>>v;
-            r--;
-            st.rangeSet(1, v, l, r);
+            int l, r; ll val; cin>>l>>r>>val; r--;
+            update(1, 0, n-1, l, r, val);
         }
         else{
             int i; cin>>i;
-            cout<<st.query(1, i, i)<<endl;
+            cout<<query(1, 0, n-1, i)<<endl;
         }
     }
-    
+}
+
+int main(){
+    ios_base::sync_with_stdio(0);cin.tie(NULL);
+    int t = 1;
+    // cin>>t;
+    while(t--){
+        solver();
+    }
+
     return 0;
 }
