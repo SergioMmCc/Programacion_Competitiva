@@ -139,31 +139,19 @@ void solver(){
     int n, t; cin>>n>>t;
 
     vii rd(n);
-    vi cx, cy;
-    for0(i,n){
-        cin>>rd[i].fi>>rd[i].se;
-        cx.pb(rd[i].fi);
-        cy.pb(rd[i].se);
-    }
-    sort(all(cx));
-    sort(all(cy));
+    for0(i,n) cin>>rd[i].fi>>rd[i].se;
 
-    int idx = 1, idy = 1;
-    map<int, int> cox, coy;
-    for(int z : cx){
-        if(cox.find(z) == cox.end()){
-            cox[z] = idx;
-            idx++;
-        }
-    }
-    for(int z : cy){
-        if(coy.find(z) == coy.end()){
-            coy[z] = idy;
-            idy++;
-        }
-    }
-
-    for0(i,n) rd[i] = {cox[rd[i].fi], coy[rd[i].se]};
+    vi compx;
+    for0(i,n) compx.pb(rd[i].fi);
+    sort(all(compx));
+    compx.erase(unique(all(compx)), compx.end());
+    for0(i,n) rd[i].fi = lb(all(compx), rd[i].fi) - compx.begin();
+    
+    vi compy;
+    for0(i,n) compy.pb(rd[i].se);
+    sort(all(compy));
+    compy.erase(unique(all(compy)), compy.end());
+    for0(i,n) rd[i].se = lb(all(compy), rd[i].se) - compy.begin();
 
     int x = rd[0].fi, y = rd[0].se;
 
