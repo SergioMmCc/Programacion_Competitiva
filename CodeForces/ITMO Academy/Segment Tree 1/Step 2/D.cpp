@@ -1,75 +1,125 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define endl '\n'
-using ll = long long;
-using ld = long double;
+#define db(x) cerr<< #x<<" "<<x<<endl
+#define for0(i,n) for(int i = 0; i < (int)n; i++)
+#define for1(i,n) for(int i = 1; i <= (int)n; i++)
+#define forlr(i,l,r) for(int i = (int)l; i <= (int)r; i++)
+#define forn1(i,n) for(int i = (int)n; i > 0; i--)
+#define forn0(i,n) for(int i = (int)(n) - 1; i >= 0; i--)
+#define forrl(i,l,r) for(int i = (int)r; i >= (int)l; i--)
 #define pb push_back
-#define sz size()
+#define sz(a) ((int)a.size())
+#define all(a) a.begin(), a.end()
 #define fi first
 #define se second
+#define lb lower_bound
+#define ub upper_bound
+#define pqueue priority_queue
+typedef long long ll;
+typedef long double ld;
 typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<string> vs;
+typedef vector<bool> vb;
+typedef vector<pii> vii;
+typedef vector<pll> vll;
+// #include<ext/pb_ds/assoc_container.hpp>
+// using namespace __gnu_pbds;
+// using indexed_set = tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>;
 
-const int maxn = 1e5 + 1;
+const ll INFL = 1000000000000000001;
+const int INF = 1e9 + 1;
+// const ll MOD = 1e9 + 7;
 
-vector<pii> tree(4*maxn);
+struct node{ // Change
+    ll val;
+};
 
-void build(vector<int>& a, int v, int tl, int tr){
-    if(tl == tr) tree[v] = {a[tl], tl};
-    else{
+class segTree {
+private:
+    int size;
+    vector<node> tree;
+    node neutro = {LLONG_MAX - 1}; // Change
+
+    node calcOp(node a, node b){ // Change
+        if(a.val == neutro.val) return b;
+        if(b.val == neutro.val) return a;
+        node ans = (a.val > b.val ? a : b);
+        return ans;
+    }
+
+    void update(int pos, ll val, int v, int tl, int tr){
+        if(tr - tl == 1){
+            tree[v] = {val}; // Change
+            return;
+        }
+        
         int tm = (tl + tr) / 2;
-        build(a, 2*v, tl, tm);
-        build(a, 2*v + 1, tm + 1, tr);
-        tree[v] = max(tree[2*v], tree[2*v + 1]);
-    }
-}
-
-// Las queries son [l, r]
-int query(int v, int tl, int tr, int x, int l){
-    if(l > tr) return -1;
-    if(tl == tr){
-        if(tree[v].fi < x) return -1;
-        return tree[v].se;
+        if(pos < tm) update(pos, val, 2*v + 1, tl, tm);
+        else update(pos, val, 2*v + 2, tm, tr);
+        tree[v] = calcOp(tree[2*v + 1], tree[2*v + 2]);
     }
 
-    int tm = (tl + tr) / 2;
-    int ans = -1;
-    if(tree[2*v].fi >= x) ans = query(2*v, tl, tm, x, l);
-    if(ans == -1 && tree[2*v + 1].fi >= x) ans = query(2*v + 1, tm + 1, tr, x, l);
-    return ans;
-}
+    // [l, r)
+    int calc(int l, int r, ll x, int v, int tl, int tr){ // Change si walking on segment tree
+        if(tl >= r || l >= tr) return -1;
+        if(tr - tl == 1) return tree[v].val >= x ? tl : -1;
 
-void update(int v, int tl, int tr, int pos, int val){
-    if(tl == tr) tree[v] = {val, pos};
-    else{
         int tm = (tl + tr) / 2;
-        if(pos <= tm) update(2*v, tl, tm, pos, val);
-        else update(2*v + 1, tm + 1, tr, pos, val);
-        tree[v] = max(tree[2*v], tree[2*v + 1]);
+        int ans = -1;
+        if(tree[2*v + 1].val >= x) ans = calc(l, r, x, 2*v + 1, tl, tm);
+        if(ans == -1 && tree[2*v + 2].val >= x) ans = calc(l, r, x, 2*v + 2, tm, tr);
+        return ans;
     }
-}
+
+    void build(vl& a, int v, int tl, int tr){
+        if(tr - tl == 1){
+           if(tl < sz(a)) tree[v] = {a[tl]}; // Change
+           return;
+        }
+        int tm = (tr + tl) / 2;
+        build(a, 2*v + 1, tl, tm);
+        build(a, 2*v + 2, tm, tr);
+        tree[v] = calcOp(tree[2*v + 1], tree[2*v + 2]);
+    }
+
+public:
+    void init(int n){
+        size = 1;
+        while(size < n) size *= 2;
+        tree.assign(2*size, {0LL});
+    }
+    void update(int pos, ll val){update(pos, val, 0, 0, size);}
+    int calc(int l, int r, ll x){return calc(l, r, x, 0, 0, size);}
+    void build(vector<ll>& a){build(a, 0, 0, size);}
+};
 
 void solver(){
-    int n, m; cin>>n>>m;
-    vector<int> a(n);
-    for(int i = 0; i < n; i++) cin>>a[i];
+    int n, q; cin>>n>>q;
+    vl a(n);
+    for0(i,n) cin>>a[i];
+    segTree st; st.init(n); st.build(a);
 
-    build(a, 1, 0, n-1);
-
-    while(m--){
+    while(q--){
         int op; cin>>op;
         if(op == 1){
-            int i, v; cin>>i>>v;
-            update(1, 0, n-1, i, v);
+            int idx; ll val; cin>>idx>>val;
+            st.update(idx, val);
         }
         else{
-            int x, l; cin>>x>>l;
-            cout<<query(1, 0, n-1, x, l)<<endl;
+            ll x; int l; cin>>x>>l;
+            cout<<st.calc(l, n, x)<<endl;
         }
     }
 }
 
 int main(){
-    ios_base::sync_with_stdio(0);cin.tie(NULL);
+    ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);
+    // freopen("name.in", "r", stdin);
+	// freopen("name.out", "w", stdout);
     int t = 1;
     // cin>>t;
     while(t--){
