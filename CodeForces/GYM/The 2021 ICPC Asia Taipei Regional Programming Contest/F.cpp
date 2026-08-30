@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 using namespace std;
+#define int long long
 #define endl '\n'
 #define db(x) cerr<< #x<<" "<<x<<endl
 #define for0(i,n) for(int i = 0; i < (int)n; i++)
@@ -36,14 +37,7 @@ const ll INFL = 1000000000000000001;
 const int INF = 1e9 + 1;
 // const ll MOD = 1e9 + 7;
 
-void compressArr(vi& x, vi& y, viiii& a){
-    sort(all(x));
-    x.erase(unique(all(x)), x.end());
-    for0(i,sz(a)){
-        a[i].fi.fi = lb(all(x), a[i].fi.fi) - x.begin();
-        a[i].se.fi = lb(all(x), a[i].se.fi) - x.begin();
-    }
-
+void compressArr(vi& y, viiii& a){
     sort(all(y));
     y.erase(unique(all(y)), y.end());
     for0(i,sz(a)){
@@ -55,53 +49,44 @@ void compressArr(vi& x, vi& y, viiii& a){
 void solver(){
     int n; cin>>n;
     viiii a(n);
-    vi col(n), y, x;
+    vi col(n), y;
+    vii x;
     for0(i,n){
-        int x1, x2, y1, y2, c; cin>>x1>>y2>>x2>>y1>>c; y2--;
+        int x1, x2, y1, y2, c; cin>>x1>>y2>>x2>>y1>>c;
         a[i] = {{x1, y1}, {x2, y2}};
         col[i] = c;
-        x.pb(x1); x.pb(x2);
+        x.pb({x1, i}); x.pb({x2, i});
         y.pb(y1); y.pb(y2);
     }
 
-    compressArr(x, y, a);
-
-    // for0(i,n){
-    //     cout<<a[i].fi.fi<<' '<<a[i].fi.se<<' '<<a[i].se.fi<<' '<<a[i].se.se<<endl;
-    // }
-
-    vector<vi> use(sz(y));
-    for0(i,n){
-        forlr(j,a[i].fi.se,a[i].se.se){
-            use[j].pb(i);
-        }
-    }
+    compressArr(y, a);
+    sort(all(x));
 
     vb ans(n+1);
-    vb is(sz(x));
+    vb is(n);
     set<int> aux;
     for0(i,sz(y)){
-        pqueue<pii, vii, greater<pii>> pq;
-        for(int x : use[i]){
-            pq.push({a[x].fi.fi, x});
-            pq.push({a[x].se.fi, x});
-        }
-        
-        while(!pq.empty()){
-            int j = pq.top().fi;
-            while(!pq.empty() && pq.top().fi == j){
-                int idx = pq.top().se;
-                pq.pop();
+        for0(j,sz(x)){
+            if(a[x[j].se].fi.se > i || a[x[j].se].se.se <= i) continue;
+            int coord = x[j].fi;
+            int k = j;
+            while(k < sz(x) && x[k].fi == coord){
+                int idx = x[k].se;
+                if(a[idx].fi.se > i || a[idx].se.se <= i){
+                    k++;
+                    continue;  
+                }
                 if(is[idx]){
-                    // assert(aux.find(idx) != aux.end());
-                    aux.erase(idx);
                     is[idx] = 0;
+                    aux.erase(idx);
                 }
                 else{
-                    aux.insert(idx);
                     is[idx] = 1;
+                    aux.insert(idx);
                 }
+                k++;
             }
+            j = k-1;
 
             if(!aux.empty()) ans[col[*aux.rbegin()]] = 1;
         }
@@ -112,7 +97,7 @@ void solver(){
     cout<<cnt<<endl;
 }
 
-int main(){
+signed main(){
     ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);
     // freopen("name.in", "r", stdin);
 	// freopen("name.out", "w", stdout);
