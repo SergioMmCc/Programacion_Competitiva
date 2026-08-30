@@ -1,101 +1,142 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define endl '\n'
-using ll = long long;
-using ld = long double;
+#define db(x) cerr<< #x<<" "<<x<<endl
+#define for0(i,n) for(int i = 0; i < (int)n; i++)
+#define for1(i,n) for(int i = 1; i <= (int)n; i++)
+#define forlr(i,l,r) for(int i = (int)l; i <= (int)r; i++)
+#define forn1(i,n) for(int i = (int)n; i > 0; i--)
+#define forn0(i,n) for(int i = (int)(n) - 1; i >= 0; i--)
+#define forrl(i,l,r) for(int i = (int)r; i >= (int)l; i--)
 #define pb push_back
-#define sz size()
+#define sz(a) ((int)a.size())
+#define all(a) a.begin(), a.end()
 #define fi first
 #define se second
+#define lb lower_bound
+#define ub upper_bound
+#define pqueue priority_queue
+typedef long long ll;
+typedef long double ld;
 typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<string> vs;
+typedef vector<bool> vb;
+typedef vector<pii> vii;
+typedef vector<pll> vll;
 // #include<ext/pb_ds/assoc_container.hpp>
 // using namespace __gnu_pbds;
-// using ordered_set = tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>;
+// using indexed_set = tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>;
 
-struct comp{
-    bool operator() (pii a, pii b){
-        if(a.second == b.second)
-            return a.first < b.first;
-        return a.second < b.second;
-    }
-};
+const ll INFL = 1000000000000000001;
+const int INF = 1e9 + 1;
+// const ll MOD = 1e9 + 7;
 
-
-
-// Aplicado en grafos de flujo dirigidos con capacidades en las aristas
-// Complejidad O(v^2 * E)
-// Para grafos con capacidades unitarias o en redes densas O(sqrt(V) * E)
-
-/* 
-	Otra aplicacion: Minimum vertex cut
-   Para hallar el minimum vertex cut tendriamos que llamar Dinic con 2*n + 2
-   y añadir una arista entre cada 2*i y 2*i + 1 con capacidad de 1, para
-   0 <= i < n. Despues se agregan aristas con capacidad 1 según las condiciones
-   del ejercicio o del grafo original. Si buscamos añadir una arista desde un
-   vertice u hasta un vertice v, usamos: graph.addEdge(2*u + 1, 2*v, 1).
-   Despues agregamos aristas desde el nodo 2*n hacia todos los nodos iniciales
-   y desde todos los nodos finales hacia el nodo 2*n + 1.
-   Finalmente, usamos graph.calc(2*n, 2*n + 1), para hallar el maximo flujo
-   desde 2*n (que cumple la funcion de source-fuente), hasta 2*n + 1 (que cumple
-   la funcion de sink-sumidero). El valor del maximo flujo corresponde al valor
-   del minimum vertex cut. 
+/*
+- Complejidad: O(v²*sqrt(e)) o (v³)
 */
 
-struct Dinic {
-	struct Edge {
-		int to, rev;
-		ll c, oc;
-		ll flow() { return max(oc - c, 0LL); } // if you need flows
-	};
-	vector<int> lvl, ptr, q;
-	vector<vector<Edge>> adj;
-	Dinic(int n) : lvl(n), ptr(n), q(n), adj(n) {}
-	void addEdge(int a, int b, ll c, ll rcap = 0) {
-		adj[a].pb({b, (int)adj[b].sz, c, c});
-		adj[b].pb({a, (int)adj[a].sz - 1, rcap, rcap});
+const int maxn = 505;
+
+template <int SZ> struct HLPP {
+	typedef ll F; // flow type
+	struct Edge { int to, rev; F f; };
+	const F INF = numeric_limits<F>::max();
+	
+	int N,s,t;
+	vector<Edge> adj[SZ];
+	void ae(int u, int v, F cap){
+		assert(cap >= 0); // don't try smth dumb
+		Edge a{v, sz(adj[v]), cap}, b{u, sz(adj[u]), 0};
+		adj[u].pb(a), adj[v].pb(b);
 	}
-	ll dfs(int v, int t, ll f) {
-		if (v == t || !f) return f;
-		for (int& i = ptr[v]; i < adj[v].size(); i++) {
-			Edge& e = adj[v][i];
-			if (lvl[e.to] == lvl[v] + 1)
-				if (ll p = dfs(e.to, t, min(f, e.c))) {
-					e.c -= p, adj[e.to][e.rev].c += p;
-					return p;
-				}
+
+	vi lst[SZ], gap[SZ];
+	F excess[SZ];
+	int highest, height[SZ], cnt[SZ], work;
+	void updHeight(int v, int nh){
+		work++;
+		if(height[v] != N) cnt[height[v]]--;
+		height[v] = nh;
+		if(nh == N) return;
+		cnt[nh]++, highest = nh;
+		gap[nh].pb(v);
+		if(excess[v] > 0) lst[nh].pb(v);
+	}
+	void globalRelabel(){
+		work = 0;
+		for0(i,N) height[i] = N, cnt[i] = 0;
+		for0(i,highest) lst[i].clear(), gap[i].clear();
+		height[t] = 0;
+		queue<int> q({t});
+		while(sz(q)){
+			int v = q.front(); q.pop();
+			for(auto &e : adj[v]){
+				if(e.to != s && height[e.to] == N && adj[e.to][e.rev].f > 0){
+					q.push(e.to), updHeight(e.to, height[v] + 1);
+                }
+            }
+			highest = height[v];
 		}
-		return 0;
 	}
-	ll calc(int s, int t) {
-		ll flow = 0; q[0] = s;
-		for(ll L = 0; L < 31; L++) do { // 'int L=30' maybe faster for random data
-			lvl = ptr = vector<int> (q.size());
-			int qi = 0, qe = lvl[s] = 1;
-			while (qi < qe && !lvl[t]) {
-				int v = q[qi++];
-				for (Edge e : adj[v])
-					if (!lvl[e.to] && e.c >> (30 - L))
-						q[qe++] = e.to, lvl[e.to] = lvl[v] + 1;
+	void push(int v, Edge& e){
+		if(excess[e.to] == 0) lst[height[e.to]].pb(e.to);
+		F df = min(excess[v], e.f);
+		e.f -= df, adj[e.to][e.rev].f += df;
+		excess[v] -= df, excess[e.to] += df;
+	}
+	void discharge(int v){
+		int nh = N;
+		for(auto &e : adj[v]){
+			if(e.f > 0){
+				if(height[v] == height[e.to] + 1){
+					push(v, e);
+					if(excess[v] <= 0) return;
+				} else nh = min(nh, height[e.to]+1);
 			}
-			while (ll p = dfs(s, t, LLONG_MAX)) flow += p;
-        } while (lvl[t]);
-		return flow;
+		}
+		if(cnt[height[v]] > 1) updHeight(v, nh);
+		else{
+			forlr(i,height[v],highest) {
+				for(auto &j : gap[i]) updHeight(j, N);
+				gap[i].clear();
+			}
+		}
 	}
-	bool leftOfMinCut(int a) { return lvl[a] != 0; }
+	F maxFlow(int _N, int _s, int _t){
+		N = _N, s = _s, t = _t; if(s == t) return -1;
+		for0(i,N) excess[i] = 0;
+		excess[s] = INF, excess[t] = -INF;
+		globalRelabel();
+		for(auto & e : adj[s]) push(s,e);
+		for(; highest >= 0; highest--){
+			while(sz(lst[highest])){
+				int v = lst[highest].back();
+				lst[highest].pop_back();
+				discharge(v);
+				if(work > 4*N) globalRelabel();
+			}
+        }
+		return excess[t]+INF;
+	}
 };
+HLPP<maxn> graph; // Inicializar (el tamaño debe ser una constante)
 
 void solver(){
     int n, m; cin>>n>>m;
-    Dinic graph(n + 2);
-    for(int i = 0; i < m; i++){
-        int s, d; ll c; cin>>s>>d>>c;
-        graph.addEdge(s, d, c);
+    for0(i,m){
+        int u, v; ll c; cin>>u>>v>>c;
+        graph.ae(u, v, c); // Agregar arista dirigida u -> v con capacidad c
     }
-    cout<<graph.calc(1, n)<<endl;
+
+    ll flow = graph.maxFlow(n, 1, n); // Si s == t, retorna -1
+    cout<<flow<<endl;
 }
 
 int main(){
-    ios_base::sync_with_stdio(0);cin.tie(NULL);
+    ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);
     // freopen("name.in", "r", stdin);
 	// freopen("name.out", "w", stdout);
     int t = 1;

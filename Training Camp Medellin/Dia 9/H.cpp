@@ -2,6 +2,12 @@
 using namespace std;
 #define endl '\n'
 #define db(x) cerr<< #x<<" "<<x<<endl
+#define for0(i,n) for(int i = 0; i < (int)n; i++)
+#define for1(i,n) for(int i = 1; i <= (int)n; i++)
+#define forlr(i,l,r) for(int i = (int)l; i <= (int)r; i++)
+#define forn1(i,n) for(int i = (int)n; i > 0; i--)
+#define forn0(i,n) for(int i = (int)(n) - 1; i >= 0; i--)
+#define forrl(i,l,r) for(int i = (int)r; i >= (int)l; i--)
 #define pb push_back
 #define sz(a) ((int)a.size())
 #define all(a) a.begin(), a.end()
@@ -24,7 +30,11 @@ typedef vector<pll> vll;
 // using namespace __gnu_pbds;
 // using indexed_set = tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>;
 
-const int limite = 200010, inf = 1e9;
+const ll INFL = 1000000000000000001;
+const int INF = 1e9 + 1;
+// const ll MOD = 1e9 + 7;
+
+const int limite = 200010;
 
 vb esPrimo(limite + 1, 1);
 vi primos;
@@ -41,47 +51,92 @@ void sieve(){
         if(esPrimo[i]) primos.pb(i); 
 }
 
-struct Dinic {
-	struct Edge {
-		int to, rev;
-		ll c, oc;
-		ll flow() { return max(oc - c, 0LL); } // if you need flows
-	};
-	vector<int> lvl, ptr, q;
-	vector<vector<Edge>> adj;
-	Dinic(int n) : lvl(n), ptr(n), q(n), adj(n) {}
-	void addEdge(int a, int b, ll c, ll rcap = 0){
-		adj[a].pb({b, sz(adj[b]), c, c});
-		adj[b].pb({a, sz(adj[a]) - 1, rcap, rcap});
-	}
-	ll dfs(int v, int t, ll f){
-		if (v == t || !f) return f;
-		for (int& i = ptr[v]; i < sz(adj[v]); i++){
-			Edge& e = adj[v][i];
-			if (lvl[e.to] == lvl[v] + 1)
-				if (ll p = dfs(e.to, t, min(f, e.c))){
-					e.c -= p, adj[e.to][e.rev].c += p;
-					return p;
-				}
-		}
-		return 0;
-	}
-	ll calc(int s, int t){
-		ll flow = 0; q[0] = s;
-		for(ll L = 0; L < 31; L++) do { // 'int L=30' maybe faster for random data
-			lvl = ptr = vector<int> (sz(q));
-			int qi = 0, qe = lvl[s] = 1;
-			while(qi < qe && !lvl[t]){
-				int v = q[qi++];
-				for(Edge e : adj[v])
-					if (!lvl[e.to] && e.c >> (30 - L))
-						q[qe++] = e.to, lvl[e.to] = lvl[v] + 1;
-			}
-			while (ll p = dfs(s, t, LLONG_MAX)) flow += p;
-        } while (lvl[t]);
-		return flow;
-	}
-	bool leftOfMinCut(int a) { return lvl[a] != 0; } // 1 si es parte del lado de source
+struct HLPP {
+    typedef ll F; // flow type
+    struct Edge { int to, rev; F f; };
+    const F INF = numeric_limits<F>::max();
+
+    int N, s, t;
+    vector<vector<Edge>> adj;
+    vector<vi> lst, gap;
+    vector<F> excess;
+    vi height, cnt;
+    int highest, work;
+
+    HLPP(int n) : N(n), s(0), t(0), adj(n), lst(n), gap(n),
+                  excess(n), height(n), cnt(n), highest(0), work(0) {}
+
+    void ae(int u, int v, F cap){
+        assert(cap >= 0);
+        Edge a{v, sz(adj[v]), cap}, b{u, sz(adj[u]), 0};
+        adj[u].pb(a), adj[v].pb(b);
+    }
+    void updHeight(int v, int nh){
+        work++;
+        if(height[v] != N) cnt[height[v]]--;
+        height[v] = nh;
+        if(nh == N) return;
+        cnt[nh]++, highest = nh;
+        gap[nh].pb(v);
+        if(excess[v] > 0) lst[nh].pb(v);
+    }
+    void globalRelabel(){
+        work = 0;
+        for0(i,N) height[i] = N, cnt[i] = 0;
+        for0(i,highest) lst[i].clear(), gap[i].clear();
+        height[t] = 0;
+        queue<int> q({t});
+        while(sz(q)){
+            int v = q.front(); q.pop();
+            for(auto &e : adj[v]){
+                if(e.to != s && height[e.to] == N && adj[e.to][e.rev].f > 0){
+                    q.push(e.to), updHeight(e.to, height[v] + 1);
+                }
+            }
+            highest = height[v];
+        }
+    }
+    void push(int v, Edge& e){
+        if(excess[e.to] == 0 && height[e.to] < N) lst[height[e.to]].pb(e.to);
+        F df = min(excess[v], e.f);
+        e.f -= df, adj[e.to][e.rev].f += df;
+        excess[v] -= df, excess[e.to] += df;
+    }
+    void discharge(int v){
+        if(height[v] >= N) return;
+        int nh = N;
+        for(auto &e : adj[v]){
+            if(e.f > 0){
+                if(height[v] == height[e.to] + 1){
+                    push(v, e);
+                    if(excess[v] <= 0) return;
+                } else nh = min(nh, height[e.to]+1);
+            }
+        }
+        if(cnt[height[v]] > 1) updHeight(v, nh);
+        else{
+            forlr(i,height[v],highest) {
+                for(auto &j : gap[i]) updHeight(j, N);
+                gap[i].clear();
+            }
+        }
+    }
+    F maxFlow(int _s, int _t){
+        s = _s, t = _t; if(s == t) return -1;
+        for0(i,N) excess[i] = 0;
+        excess[s] = INF, excess[t] = -INF;
+        globalRelabel();
+        for(auto &e : adj[s]) push(s,e);
+        for(; highest >= 0; highest--){
+            while(sz(lst[highest])){
+                int v = lst[highest].back();
+                lst[highest].pop_back();
+                discharge(v);
+                if(work > 4*N) globalRelabel();
+            }
+        }
+        return excess[t] + INF;
+    }
 };
 
 struct Edge{
@@ -98,7 +153,7 @@ bool check(int n, int k, vector<Edge>& edges, int m){
     vi par, impar;
     int ans = 0;
     pii max1 = {0, 0};
-    Dinic graph(n + 2); //Crear un grafo para usar Dinic
+    HLPP graph(n + 2); //Crear un grafo para usar Dinic
     for(int i = 0; i < sz(edges); i++){
         Edge e = edges[i];
         if(e.l > m) break;
@@ -108,28 +163,28 @@ bool check(int n, int k, vector<Edge>& edges, int m){
         }
         ans += e.p;
         if(e.c & 1){
-            graph.addEdge(n, i, e.p);
+            graph.ae(n, i, e.p);
             impar.pb(i);
         }
         else{
-            graph.addEdge(i, n+1, e.p);
+            graph.ae(i, n+1, e.p);
             par.pb(i);
         }
     }
 
     if(max1.fi){
         ans += edges[max1.se].p;
-        graph.addEdge(n, max1.se, max1.fi);
+        graph.ae(n, max1.se, max1.fi);
         impar.pb(max1.se);
     }
 
     for(int x : impar){
         for(int y : par){
-            if(esPrimo[edges[x].c + edges[y].c]) graph.addEdge(x, y, inf);
+            if(esPrimo[edges[x].c + edges[y].c]) graph.ae(x, y, INF);
         }
     }
 
-    ans -= graph.calc(n, n+1);
+    ans -= graph.maxFlow(n, n+1);
     return ans >= k;
 }
 
