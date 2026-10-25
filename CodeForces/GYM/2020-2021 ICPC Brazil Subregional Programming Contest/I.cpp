@@ -65,16 +65,25 @@ void calc(int u){
         return;
     }
     dp[u].fi = 1;
+    vl pre(sz(tree[u]) + 2, 1), suf(sz(tree[u]) + 2, 1);
+    int idx = 1;
     for(int v : tree[u]){
         calc(v);
         dp[u].fi = mul(dp[u].fi, sum(dp[v].fi, dp[v].se));
+        pre[idx] = suf[idx] = sum(dp[v].fi, dp[v].se);
+        idx++;
     }
+    for1(i,sz(tree[u])) pre[i] = mul(pre[i], pre[i-1]);
+    forn1(i,sz(tree[u])) suf[i] = mul(suf[i], suf[i+1]);
 
+    idx = 1;
     for(int v : tree[u]){
         // dp[u].se = (dp[u].se + ((dp[u].fi * mod_inverse((dp[v].fi + dp[v].se) % mod) % mod) * dp[v].se % mod)) % mod;
-        ll add = mul(dp[u].fi, mod_inverse(sum(dp[v].fi, dp[v].se)));
+        ll add = mul(pre[idx-1], suf[idx+1]);
         add = mul(add, dp[v].se);
         dp[u].se = sum(dp[u].se, add);
+
+        idx++;
     }
 }
 
