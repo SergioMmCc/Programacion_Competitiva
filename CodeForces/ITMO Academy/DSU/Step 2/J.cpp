@@ -1,80 +1,75 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define endl '\n'
-using ll = long long;
-using ld = long double;
+#define db(x) cerr<< #x<<" "<<x<<endl
+#define for0(i,n) for(int i = 0; i < (int)n; i++)
+#define for1(i,n) for(int i = 1; i <= (int)n; i++)
+#define forlr(i,l,r) for(int i = (int)l; i <= (int)r; i++)
+#define forn1(i,n) for(int i = (int)n; i > 0; i--)
+#define forn0(i,n) for(int i = (int)(n) - 1; i >= 0; i--)
+#define forrl(i,l,r) for(int i = (int)r; i >= (int)l; i--)
 #define pb push_back
-#define sz size()
-typedef pair<ll, ll> pii;
+#define sz(a) ((int)a.size())
+#define all(a) a.begin(), a.end()
+#define fi first
+#define se second
+#define lb lower_bound
+#define ub upper_bound
+#define pqueue priority_queue
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<string> vs;
+typedef vector<bool> vb;
+typedef vector<pii> vii;
+typedef vector<pll> vll;
+// #include<ext/pb_ds/assoc_container.hpp>
+// using namespace __gnu_pbds;
+// using indexed_set = tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>;
 
-const ll maxn = 300005, inf = 2e9;
-ll components;
-vector<ll> leader(maxn), sizen(maxn), len(maxn);
-// En el array len almacenamos la paridad de la distancia de
-// un vertice v a su lider
+const ll INFL = 1000000000000000001;
+const int INF = 1e9 + 1;
+// const ll MOD = 1e9 + 7;
 
-// Este algortimo sirve para ir agregando aristas a un grafo
-// de modo que siga siendo bipartito, hasta que llegue un punto
-// en el que sea imposible que el grafo siga siendo bipartito
-// Source: https://codeforces.com/edu/course/2/lesson/7/2
-
-// Implementar DSU modificado para llenar el vector "len"
-void initDSU(ll n){
-    for(ll i = 1; i <= n; i++){
-        leader[i] = i;
-        sizen[i] = 1;
-        len[i] = 0;
+struct DSU {
+    vi p, len; int comp;
+    DSU(int n) : p(n), len(n, 1), comp(n-1) { iota(all(p), 0); }
+    int find(int x) { return p[x] == x ? x : p[x] = find(p[x]); }
+    bool join(int a, int b){
+        if((a = find(a)) == (b = find(b))) return 0;
+        if(len[a] < len[b]) swap(a, b);
+        p[b] = a; len[a] += len[b]; --comp;
+        return 1;
     }
-}
-
-pii find(ll u){
-    if(leader[u] == u) return {u, 0};
-    
-    pii val = find(leader[u]);
-    leader[u] = val.first;
-    len[u] = (len[u] + val.second) % 2;
-    return {leader[u], len[u]};
-    // Retorna el lider de u y la paridad de la distancia al lider
-}
-
-ll join(ll u, ll v, ll i){
-    ll ans = inf;
-    pii valU = find(u), valV = find(v);
-    if(valU.first != valV.first){
-        if(sizen[valU.first] > sizen[valV.first])
-            swap(valU, valV);
-        leader[valU.first] = valV.first;
-        len[valU.first] = (1 + valU.second + valV.second) % 2;
-        // La distancia entre el lider de u y el lider de v es igual
-        // a la distancia entre u y su lider, mas la distancia entre
-        // v y su lider, y una arista entre u y v
-        sizen[valV.first] += sizen[valU.first];
-    }
-
-    else if(len[u] == len[v]) ans = i;
-    return ans;
-}
-
-void updateAllLeaders(ll n){
-    for(ll i = 1; i <= n; i++)
-        find(i);
-}
+};
 
 void solver(){
-    ll n, m; cin>>n>>m;
-    initDSU(n);
-    ll ans = inf;
-    for(ll i = 1; i <= m; i++){
-        ll u, v; cin>>u>>v;
-        ans = min(ans, join(u, v, i));
+    int n, m; cin>>n>>m;
+    
+    DSU uf(2*n + 1);
+    int badIdx = -1;
+    for1(i,m){
+        int u, v; cin>>u>>v;
+        if(badIdx > -1) continue;
+
+        if(uf.find(u) == uf.find(v)) badIdx = i; // Primer arista que rompe el bipartito
+        else{
+            uf.join(u, v+n);
+            uf.join(u+n, v);
+        }
     }
 
-    cout<<(ans == inf ? -1 : ans)<<endl;
+    cout<<badIdx<<endl;
 }
 
-ll main(){
-    ios_base::sync_with_stdio(0);cin.tie(NULL);
-    ll t = 1;
+int main(){
+    ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);
+    // freopen("name.in", "r", stdin);
+	// freopen("name.out", "w", stdout);
+    int t = 1;
     // cin>>t;
     while(t--){
         solver();
