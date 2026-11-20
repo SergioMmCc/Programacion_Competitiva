@@ -1,32 +1,68 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
+#define endl '\n'
+#define db(x) cerr<< #x<<" "<<x<<endl
+#define for0(i,n) for(int i = 0; i < (int)n; i++)
+#define for1(i,n) for(int i = 1; i <= (int)n; i++)
+#define forlr(i,l,r) for(int i = (int)l; i <= (int)r; i++)
+#define forn1(i,n) for(int i = (int)n; i > 0; i--)
+#define forn0(i,n) for(int i = (int)(n) - 1; i >= 0; i--)
+#define forrl(i,l,r) for(int i = (int)r; i >= (int)l; i--)
+#define pb push_back
+#define sz(a) ((int)a.size())
+#define all(a) a.begin(), a.end()
+#define fi first
+#define se second
+#define lb lower_bound
+#define ub upper_bound
+#define pqueue priority_queue
+typedef long long ll;
+typedef long double ld;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<string> vs;
+typedef vector<bool> vb;
+typedef vector<pii> vii;
+typedef vector<pll> vll;
+// #include<ext/pb_ds/assoc_container.hpp> // Poner arriba de #define int long long si lo hay
+// using namespace __gnu_pbds;
+// using indexed_set = tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update>;
 
-using ll=long long;
-using vi=vector<int>;
+const ll INFL = 1000000000000000001;
+const int INF = 1e9 + 1;
+const ll mod = 1e9 + 7;
 
-const int MOD = 1e9 + 7;
+void solver(){
+    int n, s; cin>>n>>s;
+    vector<vi> dp(s+1, vi(n+1)), ps(s+1, vi(n+1));
+    forn1(j,n){
+        dp[n][j] = 1;
+        ps[n][j] = n - j + 1;
+    }
 
-void solver() {
-    int s, b;cin>>s>>b;
-    int n=b-s;
-    vector<vi>dp(n+1,vi(s+1,0));
-    vector<vi>sum(n+1,vi(s+1,0));
-    for(int j=1;j<=s;j++)
-        dp[0][j] = 1;
-    for(int i=1;i<=n;i++) {
-        for(int j=1;j<=s;j++) {
-            int s_val=sum[i][j - 1];
-            if(i>=j)
-                s_val=(s_val+dp[i-j][j])%MOD;
-            sum[i][j]=s_val;
-            dp[i][j]=(dp[i][j-1]+s_val)%MOD;
+    forlr(i,n+1,s){
+        forn1(j,n){
+            dp[i][j] = ps[i-j][j];
+            if(j < n) dp[i][j] = (dp[i][j] + dp[i][j+1]) % mod;
+            ps[i][j] = dp[i][j];
+            if(j < n) ps[i][j] = (ps[i][j] + ps[i][j+1]) % mod;
         }
     }
-    cout<<dp[n][s]<<"\n";
+
+    cout<<dp[s][1]<<endl;
 }
 
-int main() {
-    cin.tie(0)->sync_with_stdio(0);
-    int t = 1; 
-    while (t--) solver();
+int main(){
+    ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);
+    // freopen("name.in", "r", stdin);
+	// freopen("name.out", "w", stdout);
+    int t = 1;
+    // cin>>t;
+    while(t--){
+        solver();
+    }
+
+    return 0;
 }
